@@ -11,3 +11,6 @@ const pool = mysql.createPool({
 
 module.exports = pool.promise();
 
+// Revisión de la pool de conexiones a la base de datos
+
+
