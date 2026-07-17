@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar Sala</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+    <h1>Editar Sala: <%= sala.nombre %></h1>
+    
+    <form action="/salas/editar/<%= sala.id %>" method="POST">
+        <div style="margin-bottom: 15px;">
+            <label>Nombre de la Sala:</label><br>
+            <input type="text" name="nombre" value="<%= sala.nombre %>" required style="padding: 8px; width: 300px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>Capacidad (Asientos):</label><br>
+            <input type="number" name="capacidad" value="<%= sala.capacidad %>" required style="padding: 8px; width: 300px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>Tipo de Pantalla:</label><br>
+            <select name="tipo_pantalla" required style="padding: 8px; width: 318px;">
+                <option value="2D" <%= sala.tipo_pantalla === '2D' ? 'selected' : '' %>>2D</option>
+                <option value="3D" <%= sala.tipo_pantalla === '3D' ? 'selected' : '' %>>3D</option>
+                <option value="IMAX" <%= sala.tipo_pantalla === 'IMAX' ? 'selected' : '' %>>IMAX</option>
+            </select>
+        </div>
+        <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Actualizar Sala</button>
+        <a href="/salas" style="margin-left: 10px; text-decoration: none; color: gray;">Cancelar</a>
+    </form>
+</body>
+</html>

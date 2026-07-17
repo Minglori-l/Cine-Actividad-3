@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Funciones Programadas</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <style>
+        /* Fondo con degradado temático de cielo matutino */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #d4ecfc 0%, #eff6ff 45%, #f9fbfd 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 40px 20px;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Contenedor tipo tarjeta limpia para la tabla */
+        .content-container {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(31, 61, 89, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
+            margin-bottom: 30px;
+        }
+
+        h1, h2 {
+            color: #1e3d59;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 { font-size: 2.2rem; margin-top: 0; margin-bottom: 25px; }
+        h2 { font-size: 1.5rem; margin-top: 20px; margin-bottom: 15px; }
+
+        .btn-create {
+            display: inline-block;
+            background-color: #2ecc71;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+        }
+
+        .btn-create:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(46, 204, 113, 0.3);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        th {
+            background-color: #1e3d59;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 0.95rem;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eef2f5;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafd; }
+
+        .link-action {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .link-action:hover {
+            color: #1f6fa2;
+            text-decoration: underline;
+        }
+
+        .btn-delete {
+            color: #e74c3c;
+            margin-left: 12px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+            padding: 0;
+        }
+
+        .btn-delete:hover {
+            color: #c0392b;
+            text-decoration: underline;
+        }
+
+        .link-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #718096;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 15px;
+            transition: color 0.2s;
+        }
+
+        .link-back:hover { color: #1e3d59; }
+
+        /* Contenedor del renderizado de API */
+        .api-badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .api-badge {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #4a5568;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="content-container">
+        <h1>📅 Funciones Programadas (Renderizado desde el Servidor)</h1>
+        <p><small style="color: #718096;">*Esta tabla fue generada en el servidor mediante el motor de plantillas EJS.</small></p>
+        
+        <a href="/funciones/nueva" class="btn-create">+ Programar Nueva Función</a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Película</th>
+                    <th>Sala</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% funciones.forEach(function(f) { %>
+                    <tr>
+                        <td><%= f.id %></td>
+                        <td><%= f.titulo ? f.titulo : 'Sin asignar' %></td>
+                        <td><%= f.sala_nombre %></td>
+                        <td><%= new Date(f.fecha).toLocaleString() %></td>
+                        <td>
+                            <a href="/funciones/editar/<%= f.id %>" class="link-action">✏️ Editar</a>
+                            <button onclick="eliminarFuncion(<%= f.id %>)" class="btn-delete">🗑️ Eliminar</button>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="content-container">
+        <h2>⚡ Últimas Funciones Registradas (Cargadas desde API)</h2>
+        <p><small style="color: #718096;">*Estos bloques se renderizan en vivo mediante Javascript consultando un endpoint JSON.</small></p>
+        
+        <div id="lista-api-funciones" class="api-badge-container">
+            <span style="color: #a0aec0;">Cargando datos desde la API...</span>
+        </div>
+
+        <br>
+        <a href="/" class="link-back">🏠 Volver al inicio</a>
+    </div>
+
+    <script>
+    // JS para la petición a la API y Renderizado dinámico en Cliente
+    document.addEventListener("DOMContentLoaded", () => {
+        // Suponiendo que tu ruta de router apunte a funcionesController.ultimasCinco
+        // Cambia '/funciones/api/ultimas' por la ruta exacta que le diste en tus archivos de routes
+        fetch('/funciones/ultimas') 
+            .then(res => res.json())
+            .then(funciones => {
+                const contenedor = document.getElementById('lista-api-funciones');
+                contenedor.innerHTML = ''; // Limpiamos el texto de carga
+
+                if(funciones.length === 0) {
+                    contenedor.innerHTML = '<span>No hay funciones recientes.</span>';
+                    return;
+                }
+
+                // Aquí ocurre el renderizado dinámico en el navegador
+                funciones.forEach(f => {
+                    const fechaFormateada = new Date(f.fecha).toLocaleDateString();
+                    contenedor.innerHTML += `
+                        <div class="api-badge">
+                            <strong>🎬 ID Función: ${f.id}</strong><br>
+                            📅 Fecha: ${fechaFormateada}<br>
+                            🍿 Sala ID: ${f.sala_id}
+                        </div>
+                    `;
+                });
+            })
+            .catch(err => {
+                console.error("Error cargando API:", err);
+                document.getElementById('lista-api-funciones').innerHTML = 
+                    '<span style="color: #e74c3c;">Error al conectar con la API de funciones.</span>';
+            });
+    });
+
+    // Función para eliminar
+    function eliminarFuncion(id) {
+        if (confirm('¿Seguro que quieres eliminar esta función?')) {
+            fetch('/funciones/eliminar/' + id, {
+                method: 'DELETE'
+            })
+            .then(respuesta => {
+                if (!respuesta.ok) throw new Error('Error en la respuesta del servidor');
+                return respuesta.json();
+            })
+            .then(datos => {
+                window.location.reload(); 
+            })
+            .catch(error => {
+                console.error('Error al intentar eliminar:', error);
+                alert('No se pudo eliminar la función.');
+            });
+        }
+    }
+    </script>
+</body>
+</html>

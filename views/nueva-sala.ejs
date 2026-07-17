@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nueva Sala</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+    <h1>Registrar Nueva Sala</h1>
+    
+    <form action="/salas/nueva" method="POST">
+        <div style="margin-bottom: 15px;">
+            <label>Nombre de la Sala:</label><br>
+            <input type="text" name="nombre" required placeholder="Ej. Sala VIP 1" style="padding: 8px; width: 300px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>Capacidad (Asientos):</label><br>
+            <input type="number" name="capacidad" required style="padding: 8px; width: 300px;">
+        </div>
+        <div style="margin-bottom: 15px;">
+            <label>Tipo de Pantalla:</label><br>
+            <select name="tipo_pantalla" required style="padding: 8px; width: 318px;">
+                <option value="2D">2D</option>
+                <option value="3D">3D</option>
+                <option value="IMAX">IMAX</option>
+            </select>
+        </div>
+        <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">Guardar Sala</button>
+        <a href="/salas" style="margin-left: 10px; text-decoration: none; color: gray;">Cancelar</a>
+    </form>
+</body>
+</html>

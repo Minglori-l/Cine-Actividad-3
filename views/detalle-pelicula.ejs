@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Detalles de la Película</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+    <h1>🔍 Ficha Técnica: <%= pelicula.titulo %></h1>
+    
+    <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 600px;">
+        <h2 style="color: #007bff; margin-top: 0;"><%= pelicula.titulo %></h2>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        
+        <p style="font-size: 1.1em; margin: 10px 0;">
+            <strong>🆔 ID en Sistema:</strong> <%= pelicula.id %>
+        </p>
+        <p style="font-size: 1.1em; margin: 10px 0;">
+            <strong>🎬 Director:</strong> <%= pelicula.director %>
+        </p>
+        <p style="font-size: 1.1em; margin: 10px 0;">
+            <strong>📅 Año de Estreno:</strong> <%= pelicula.anio %>
+        </p>
+    </div>
+
+    <br><br>
+    <a href="/cartelera" style="padding: 10px 15px; background: #2c3e50; color: white; text-decoration: none; border-radius: 5px;">⬅️ Volver a la cartelera</a>
+</body>
+</html>

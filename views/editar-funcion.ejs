@@ -1,0 +1,14 @@
+<form action="/funciones/editar/<%= funcion.id %>" method="POST">
+    <select name="pelicula_id" required>
+        <% peliculas.forEach(p => { %> 
+            <option value="<%= p.id %>" <%= funcion.pelicula_id == p.id ? 'selected' : '' %>><%= p.titulo %></option> 
+        <% }) %>
+    </select>
+    <select name="sala_id" required>
+        <% salas.forEach(s => { %> 
+            <option value="<%= s.id %>" <%= funcion.sala_id == s.id ? 'selected' : '' %>><%= s.nombre %></option> 
+        <% }) %>
+    </select>
+    <input type="datetime-local" name="fecha" value="<%= funcion.fecha.toISOString().slice(0,16) %>" required>
+    <button type="submit">Actualizar</button>
+</form>

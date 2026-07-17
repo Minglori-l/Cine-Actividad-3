@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gestión de Salas</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <style>
+        /* Fondo con degradado temático de cielo matutino */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #d4ecfc 0%, #eff6ff 45%, #f9fbfd 100%);
+            background-attachment: fixed; /* Mantiene el degradado fijo al hacer scroll */
+            margin: 0;
+            padding: 40px 20px;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Contenedor tipo tarjeta limpia para la tabla */
+        .content-container {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85); /* Blanco traslúcido */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(31, 61, 89, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
+            margin-bottom: 30px;
+        }
+
+        /* Título de la sección */
+        h1, h2 {
+            color: #1e3d59;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h1 { font-size: 2.2rem; margin-bottom: 25px; }
+        h2 { font-size: 1.6rem; margin-bottom: 15px; border-bottom: 2px dashed #b4dbf7; padding-bottom: 8px; }
+
+        /* Botón azul estilizado para nueva sala */
+        .btn-create {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn-create:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Estilización moderna para la Tabla de Datos */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden; /* Para que los bordes redondeados afecten a las filas */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        th {
+            background-color: #1e3d59;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 0.95rem;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eef2f5;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #f8fafd; /* Resalta la fila al pasar el mouse */
+        }
+
+        /* Contenedor flexible de acciones dentro de la celda */
+        .actions-cell {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Enlaces de acciones (Editar / Eliminar) */
+        .link-edit {
+            color: #2ecc71;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .link-edit:hover {
+            color: #27ae60;
+            text-decoration: underline;
+        }
+
+        .btn-delete {
+            color: #e74c3c;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+            padding: 0;
+        }
+
+        .btn-delete:hover {
+            color: #c0392b;
+            text-decoration: underline;
+        }
+
+        .link-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #718096;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 15px;
+            transition: color 0.2s;
+        }
+
+        .link-back:hover {
+            color: #1e3d59;
+        }
+
+        /* Contenedor dinámico de la API */
+        .api-render-container {
+            background: #fdfefe;
+            border-left: 5px solid #9b59b6;
+            padding: 15px 20px;
+            border-radius: 4px 10px 10px 4px;
+            margin-top: 10px;
+        }
+        
+        .api-item {
+            padding: 8px 0;
+            border-bottom: 1px dashed #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.92rem;
+        }
+        
+        .api-item:last-child { border-bottom: none; }
+        .badge-api { background: #9b59b6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="content-container">
+        <h1>🎬 Salas de Cine (Renderizado por Vista/EJS)</h1>
+        
+        <a href="/salas/nueva" class="btn-create">+ Crear Nueva Sala</a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Capacidad</th>
+                    <th>Tipo de Pantalla</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% salas.forEach(function(sala) { %>
+                    <tr>
+                        <td><%= sala.id %></td>
+                        <td><%= sala.nombre %></td>
+                        <td><%= sala.capacidad %> asientos</td>
+                        <td><strong><%= sala.tipo_pantalla %></strong></td>
+                        <td>
+                            <div class="actions-cell">
+                                <a href="/salas/editar/<%= sala.id %>" class="link-edit">✏️ Editar</a>
+                                <button onclick="eliminarSala(<%= sala.id %>)" class="btn-delete">🗑️ Eliminar</button>
+                            </div>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+        <a href="/" class="link-back">🏠 Volver al inicio</a>
+    </div>
+
+    <div class="content-container">
+        <h2>⚡ Monitor de Salas Activas <span class="badge-api">CLIENT-SIDE FETCH</span></h2>
+        <p style="color:#718096; font-size:0.9rem; margin-top:0;">Esta sección consulta la infraestructura física consultando asíncronamente el endpoint JSON de la API:</p>
+        
+        <div class="api-render-container">
+            <div id="lista-salas-api">
+                <p style="color:#a0aec0; font-style:italic;">Analizando disponibilidad de salas...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Función clásica de borrado
+    function eliminarSala(id) {
+        if (confirm('¿Seguro que quieres borrar esta sala definitivamente?')) {
+            fetch('/salas/eliminar/' + id, { method: 'DELETE' })
+            .then(() => {
+                window.location.reload(); 
+            })
+            .catch(error => console.log('Error:', error));
+        }
+    }
+
+    // Bloque Fetch para renderizar datos del lado del cliente (CSR)
+    document.addEventListener("DOMContentLoaded", function() {
+        // Consultamos el endpoint correspondiente de tu API REST
+        fetch('/api/salas') 
+            .then(response => response.json())
+            .then(data => {
+                const contenedor = document.getElementById('lista-salas-api');
+                contenedor.innerHTML = ''; // Limpiamos el texto provisional
+                
+                if(data.length === 0) {
+                    contenedor.innerHTML = '<p style="color:#a0aec0;">No hay complejos ni salas configuradas de forma remota.</p>';
+                    return;
+                }
+
+                // Listamos las salas obtenidas pures en el cliente
+                data.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'api-item';
+                    div.innerHTML = `
+                        <span>🏢 <strong>${s.nombre}</strong> (ID: ${s.id})</span>
+                        <span style="color:#8e44ad;">🖥️ Tecnología: <strong>${s.tipo_pantalla}</strong> (${s.capacidad} pax)</span>
+                    `;
+                    contenedor.appendChild(div);
+                });
+            })
+            .catch(error => {
+                console.error('Error en fetch de la API de salas:', error);
+                document.getElementById('lista-salas-api').innerHTML = 
+                    '<p style="color:#e74c3c;">⚠️ No se pudo renderizar la API. Asegura que la ruta /api/salas retorne el arreglo JSON legítimo.</p>';
+            });
+    });
+    </script>
+</body>
+</html>

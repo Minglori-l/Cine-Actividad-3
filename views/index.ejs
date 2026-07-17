@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Administración del Cine</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+
+    <style>
+    /* Configuración  con vibras Ghibli / Cine Clásico */
+    /* Configuración con vibras Ghibli / Cine Clásico */
+    body {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        /* Imagen de fondo estilo cielo */
+        background-image: url('https://i.pinimg.com/1200x/ea/5a/84/ea5a843c19f3da122ec6d02f061f64b2.jpg');
+        background-size: cover;          /* Hace que la imagen cubra toda la pantalla sin deformarse */
+        background-position: center;     /* Centra el cielo en la pantalla */
+        background-attachment: fixed;    /* El fondo se queda quieto si hay scroll (da un efecto premium) */
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 85vh;
+    }
+
+    /* Contenedor principal para agrupar todo */
+    /* Modifica o añade la clase .container para que quede así: */
+.container {
+    max-width: 900px;
+    background: rgba(255, 255, 255, 0.75); /* Blanco con 75% de opacidad para ver el cielo de fondo */
+    backdrop-filter: blur(12px);          /* Efecto de desenfoque premium (vidrio esmerilado) */
+    -webkit-backdrop-filter: blur(12px);  /* Soporte para Safari */
+    padding: 50px 40px;
+    border-radius: 20px;                  /* Bordes más redondeados y amigables estilo Ghibli */
+    border: 1px solid rgba(255, 255, 255, 0.4); /* Un borde brillante muy sutil */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08); /* Sombra suave para dar profundidad */
+    text-align: center;
+}
+
+/* Para asegurarnos de que los botones se organicen en una bonita fila horizontal */
+.menu-grid {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap; /* Si la pantalla es pequeña, se acomodan solos */
+    margin-top: 30px;
+}
+
+/* Estilo para los botones en forma de tarjetas limpias */
+.menu-grid a {
+    display: flex;
+    flex-direction: column; /* Icono arriba, texto abajo */
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+    padding: 20px;
+    background: #ffffff;
+    color: #1e3d59;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+/* Efecto al pasar el cursor sobre los botones */
+.menu-grid a:hover {
+    transform: translateY(-5px);
+    background-color: #1e3d59;
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(30, 61, 89, 0.3);
+}
+
+/* Espaciado para los emojis */
+.menu-grid a span {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+}
+</style>
+  </head>
+  <body>
+    <div class="container">
+    <h1>Cine Caproni</h1>
+    <p>Bienvenido al sistema de gestión de Cine Caproni. Selecciona un módulo para coordinar las funciones, películas y salas del día de hoy.</p>
+    
+    <div class="menu-grid">
+        <a href="/salas"><span>🎬</span> Gestionar Salas</a>
+        <a href="/tickets"><span>🎟️</span> Gestionar Tickets</a>
+        <a href="/cartelera"><span>🎞️</span> Ver Cartelera</a>
+        <a href="/ver-funciones"><span>📅</span> Ver Funciones</a>
+    </div>
+</div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,10 @@
+<form action="/funciones/nueva" method="POST">
+    <select name="pelicula_id" required>
+        <% peliculas.forEach(p => { %> <option value="<%= p.id %>"><%= p.titulo %></option> <% }) %>
+    </select>
+    <select name="sala_id" required>
+        <% salas.forEach(s => { %> <option value="<%= s.id %>"><%= s.nombre %></option> <% }) %>
+    </select>
+    <input type="datetime-local" name="fecha" required>
+    <button type="submit">Guardar</button>
+</form>

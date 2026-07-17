@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar Película</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+    <h1>Editar Película</h1>
+    
+    <form id="formularioEditar">
+        <label>Título:</label><br>
+        <input type="text" id="titulo" value="<%= pelicula.titulo %>" required><br><br>
+
+        <label>Director:</label><br>
+        <input type="text" id="director" value="<%= pelicula.director %>" required><br><br>
+
+        <label>Año:</label><br>
+        <input type="number" id="anio" value="<%= pelicula.año || pelicula.anio %>" required><br><br>
+
+        <button type="submit" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;">Actualizar Película</button>
+<a href="/cartelera" style="margin-left: 15px; color: #6c757d; text-decoration: none; font-size: 14px; font-weight: bold;">Cancelar</a>
+    </form>
+
+    <script>
+    document.getElementById('formularioEditar').addEventListener('submit', function(e) {
+        e.preventDefault(); 
+
+        const id = "<%= pelicula.id %>";
+        const datos = {
+            titulo: document.getElementById('titulo').value,
+            director: document.getElementById('director').value,
+            anio: document.getElementById('anio').value
+        };
+
+        // Mandamos la actualización usando PUT de forma limpia
+        fetch('/pelicula/editar/' + id, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datos)
+        })
+        .then(respuesta => respuesta.json())
+        .then(data => {
+            // Regresa a la cartelera automáticamente
+            window.location.href = '/cartelera';
+        })
+        .catch(error => console.log('Error:', error));
+    });
+
+    </script>
+
+</body>
+</html>

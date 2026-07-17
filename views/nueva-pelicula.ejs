@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agregar Película</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+    <h1>🎥 Añadir Nueva Película</h1>
+    <p>Completa la información para registrar el filme en la base de datos.</p>
+    
+    <form action="/agregar-pelicula" method="POST">
+        <div style="margin-bottom: 15px;">
+            <label for="titulo"><strong>Título del Filme:</strong></label>
+            <input type="text" id="titulo" name="titulo" required placeholder="Ej. Inception">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="director"><strong>Director:</strong></label>
+            <input type="text" id="director" name="director" required placeholder="Ej. Christopher Nolan">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="año"><strong>Año de Estreno:</strong></label>
+            <input type="number" id="anio" name="anio" required placeholder="Ej. 2010">
+        </div>
+
+        <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em;">💾 Guardar Película</button>
+        <a href="/cartelera" style="margin-left: 15px; color: #666; text-decoration: none;">Cancelar</a>
+    </form>
+</body>
+</html>
