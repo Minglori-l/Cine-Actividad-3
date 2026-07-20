@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Cine Caproni</title>
+    <!-- Usamos Bootstrap para que se vea profesional sin esfuerzo -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+
+    /* Configuración con vibras Ghibli / Cine Clásico */
+    body {
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        background-image: url('https://images.squarespace-cdn.com/content/v1/60c0cbb7ba596c14b0e1d74b/43f2bad3-5cb3-4985-adfd-42097786cd9c/Totoro-main-2.gif');
+        background-size: cover;          /* Hace que la imagen cubra toda la pantalla sin deformarse */
+        background-position: center;     /* Centra el cielo en la pantalla */
+        background-attachment: fixed;    /* El fondo se queda quieto si hay scroll */
+        margin: 0;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 85vh;
+    }
+        body {
+            background-color: #8f8383a2;
+            color: #ffffffa2;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background-color: #2088c49c;
+            border: 1px solid #9c959593;
+            border-radius: 10px;
+        }
+        .btn-primary {
+            background-color: #2a09e5;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0a1fdae0;
+        }
+        a {
+            color: #2d10d4;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card p-4 shadow-lg">
+                <h2 class="text-center mb-4">Cine Caproni</h2>
+                <h5 class="text-center text-muted mb-4">Iniciar Sesión</h5>
+
+                <!-- Mostrar error si existe -->
+                <% if (error) { %>
+                    <div class="alert alert-danger" role="alert">
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <form action="/users/login" method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Usuario</label>
+                        <input type="text" class="form-control bg-dark text-white border-secondary" id="username" name="username" required placeholder="Ej: admin">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control bg-dark text-white border-secondary" id="password" name="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 mt-3">Ingresar</button>
+                </form>
+
+                <p class="text-center mt-4 mb-0 text-muted">
+                    ¿No tienes cuenta? <a href="/users/registro">Regístrate aquí</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
