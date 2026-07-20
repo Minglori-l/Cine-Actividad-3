@@ -17,6 +17,37 @@
             align-items: center;
         }
 
+        /* 👑 Barra de usuario superior */
+        .user-bar {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e3d59;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(30, 61, 89, 0.15);
+            box-sizing: border-box;
+        }
+
+        .btn-logout {
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #c0392b;
+        }
+
         /* Contenedor tipo tarjeta limpia para la tabla */
         .content-container {
             max-width: 1000px;
@@ -173,10 +204,21 @@
 </head>
 <body>
 
+    <!-- 👤 BARRA DE USUARIO LOGUEADO -->
+    <% if (user) { %>
+        <div class="user-bar">
+            <span>👤 Conectado como: <strong><%= user.username %></strong> (<span style="color:#f1c40f;"><%= user.rol %></span>)</span>
+            <a href="/users/logout" class="btn-logout">🔑 Cerrar Sesión</a>
+        </div>
+    <% } %>
+
     <div class="content-container">
         <h1>🎟️ Tickets Vendidos (Renderizado por Vista/EJS)</h1>
         
-        <a href="/tickets/nuevo" class="btn-create">+ Vender Nuevo Ticket</a>
+        <!-- 🔐 BOTÓN VENDER TICKET: Solo visible para Administrador y Empleado -->
+        <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
+            <a href="/tickets/nuevo" class="btn-create">+ Vender Nuevo Ticket</a>
+        <% } %>
 
         <table>
             <thead>
@@ -185,7 +227,10 @@
                     <th>Función (Fecha y Sala)</th>
                     <th>Asiento</th>
                     <th>Precio</th>
-                    <th>Acciones</th>
+                    <!-- 🔐 COLUMNA ACCIONES: Oculta por completo para clientes -->
+                    <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
+                        <th>Acciones</th>
+                    <% } %>
                 </tr>
             </thead>
             <tbody>
@@ -195,12 +240,16 @@
                         <td><%= new Date(ticket.fecha).toLocaleString() %> - <strong><%= ticket.sala_nombre %></strong></td>
                         <td>Asiento <%= ticket.asiento %></td>
                         <td><strong>$<%= ticket.precio %></strong></td>
-                        <td>
-                            <div class="actions-cell">
-                                <a href="/tickets/editar/<%= ticket.id %>" class="link-edit">✏️ Editar</a>
-                                <button onclick="eliminarTicket(<%= ticket.id %>)" class="btn-delete">🗑️ Eliminar</button>
-                            </div>
-                        </td>
+                        
+                        <!-- 🔐 CELDAS DE ACCIÓN: Solo para Administradores y Empleados -->
+                        <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
+                            <td>
+                                <div class="actions-cell">
+                                    <a href="/tickets/editar/<%= ticket.id %>" class="link-edit">✏️ Editar</a>
+                                    <button onclick="eliminarTicket('<%= ticket.id %>')" class="btn-delete">🗑️ Eliminar</button>
+                                </div>
+                            </td>
+                        <% } %>
                     </tr>
                 <% }); %>
             </tbody>
@@ -221,27 +270,39 @@
     </div>
 
     <script>
-    // Función síncrona/clásica para eliminar
+    // 🗑️ Función para eliminar un ticket (Apunta a router.delete('/eliminar/:id'))
     function eliminarTicket(id) {
         if (confirm('¿Seguro que quieres borrar este ticket definitivamente?')) {
-            fetch('/tickets/eliminar/' + id, { method: 'DELETE' })
-            .then(() => {
+            fetch('/api/tickets/eliminar/' + id, { method: 'DELETE' })
+            .then(respuesta => {
+                if (!respuesta.ok) {
+                    throw new Error('No autorizado');
+                }
                 window.location.reload(); 
             })
-            .catch(error => console.log('Error:', error));
+            .catch(error => {
+                console.error('Error al eliminar:', error);
+                alert('No tienes los permisos necesarios para realizar esta acción o la ruta no existe.');
+            });
         }
     }
 
-    // Código AJAX / Fetch para demostrar Renderizado en Cliente (CSR)
+    // ⚡ Monitor en Vivo - Código AJAX / Fetch (CSR)
     document.addEventListener("DOMContentLoaded", function() {
-        // Consultamos la ruta pública de tu API REST
-        fetch('/api/tickets') 
-            .then(response => response.json())
+        // 🔥 CORRECCIÓN AQUÍ: /api/tickets (de app.js) + /api (de tickets.js)
+        fetch('/api/tickets/api') 
+            .then(response => {
+                if (!response.ok) {
+                    console.error("👉 Error en servidor. Código de estado:", response.status);
+                    throw new Error('Código de error: ' + response.status);
+                }
+                return response.json();
+            })
             .then(data => {
                 const contenedor = document.getElementById('lista-tickets-api');
                 contenedor.innerHTML = ''; // Limpiamos el texto de carga
                 
-                if(data.length === 0) {
+                if(!data || data.length === 0) {
                     contenedor.innerHTML = '<p style="color:#a0aec0;">No hay transacciones recientes en el log.</p>';
                     return;
                 }
@@ -262,7 +323,7 @@
             .catch(error => {
                 console.error('Error en fetch de la API:', error);
                 document.getElementById('lista-tickets-api').innerHTML = 
-                    '<p style="color:#e74c3c;">⚠️ No se pudo renderizar la API. Asegura que la ruta /api/tickets devuelva JSON.</p>';
+                    '<p style="color:#e67e22;">⚠️ <strong>Acceso restringido o error de carga:</strong> Solo los administradores y empleados autorizados pueden monitorizar ventas en tiempo real.</p>';
             });
     });
     </script>

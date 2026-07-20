@@ -1,31 +1,185 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Nuevo Ticket</title>
+    <title>Vender Nuevo Ticket</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <style>
+        /* 🌤️ Fondo celeste claro idéntico al de tu segunda imagen */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #eef6ff; 
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* ⬜ Tarjeta blanca con bordes redondeados y sombra sutil */
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(30, 61, 89, 0.04);
+            padding: 40px;
+            width: 100%;
+            max-width: 480px;
+            box-sizing: border-box;
+        }
+
+        /* 🎬 Título estilo "Registrar Nueva Sala" */
+        .card-title {
+            color: #1e3d59;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ✂️ Línea divisoria punteada en azul claro */
+        .divider {
+            border: none;
+            border-bottom: 1px dashed #b4dbf7;
+            margin-bottom: 30px;
+        }
+
+        /* Contenedores de los campos */
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        /* Etiquetas en gris oscuro/azul con peso semi-bold */
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* 📝 Inputs y Selectores estilizados y limpios */
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            color: #334155;
+            background-color: #ffffff;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        /* Suave enfoque al hacer clic */
+        .form-control:focus {
+            border-color: #abc9e9;
+            box-shadow: 0 0 0 3px rgba(171, 201, 233, 0.2);
+        }
+
+        /* Flecha personalizada para el selector de función */
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%234a5568' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        /* 🔘 Contenedor inferior de botones */
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        /* 🟢 Botón verde vibrante con icono */
+        .btn-submit {
+            background-color: #22c55e; 
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 22px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #16a34a;
+        }
+
+        /* Enlace de cancelar clásico */
+        .btn-cancel {
+            color: #718096;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .btn-cancel:hover {
+            color: #4a5568;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <h1>Vender Nuevo Ticket</h1>
-    
-    <form action="/tickets/nuevo" method="POST">
-        <div style="margin-bottom: 15px;">
-            <label>Seleccionar Función:</label><br>
-            <select name="funcion_id" required style="padding: 8px; width: 318px;">
-                <% funciones.forEach(function(funcion) { %>
-                    <option value="<%= funcion.id %>"><%= new Date(funcion.fecha).toLocaleString() %> - <%= funcion.sala_nombre %></option>
-                <% }); %>
-            </select>
-        </div>
-        <div style="margin-bottom: 15px;">
-            <label>Asiento (Ej. A1, B4):</label><br>
-            <input type="text" name="asiento" required style="padding: 8px; width: 300px;">
-        </div>
-        <div style="margin-bottom: 15px;">
-            <label>Precio ($):</label><br>
-            <input type="number" step="0.01" name="precio" required style="padding: 8px; width: 300px;">
-        </div>
-        <button type="submit" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">Vender Ticket</button>
-        <a href="/tickets" style="margin-left: 10px; text-decoration: none; color: gray;">Cancelar</a>
-    </form>
+
+    <div class="card">
+        <h1 class="card-title">🎟️ Vender Nuevo Ticket</h1>
+        <div class="divider"></div>
+
+        <form action="/tickets/nuevo" method="POST">
+            
+            <!-- 1. Selección de Función -->
+            <div class="form-group">
+                <label for="funcion_id">Selecciona la Función:</label>
+                <!-- 🌟 Se agregó 'class="form-control"' para corregir el diseño visual -->
+                <select name="funcion_id" id="funcion_id" class="form-control" required>
+                    <option value="">-- Selecciona una función --</option>
+                    <% funciones.forEach(funcion => { %>
+                        <!-- 🚨 OJO AQUÍ: Si en tu base de datos la columna se llama 'funcion_id' o 'id_funcion', cambia 'funcion.id' por ese nombre exacto (Ej: funcion.funcion_id) -->
+                        <option value="<%= funcion.id || funcion.funcion_id || funcion.id_funcion %>">
+                            <%= funcion.titulo_pelicula %> - <%= funcion.horario %> (Sala <%= funcion.sala %>)
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <!-- 2. Asiento -->
+            <div class="form-group">
+                <label for="asiento">Asiento (Ej. A1, B4):</label>
+                <input type="text" name="asiento" id="asiento" class="form-control" placeholder="Ej. A1" required autocomplete="off">
+            </div>
+
+            <!-- 3. Precio -->
+            <div class="form-group">
+                <label for="precio">Precio ($):</label>
+                <input type="number" name="precio" id="precio" class="form-control" step="0.01" min="0" placeholder="Ej. 12.50" required>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="actions">
+                <button type="submit" class="btn-submit">
+                    <span>🎟️</span> Vender Ticket
+                </button>
+                <a href="/tickets" class="btn-cancel">Cancelar</a>
+            </div>
+
+        </form>
+    </div>
+
 </body>
 </html>
