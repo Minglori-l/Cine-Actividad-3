@@ -3,29 +3,158 @@
 <head>
     <title>Editar Sala</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <style>
+        /* Fondo con degradado temático de cielo matutino */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #d4ecfc 0%, #eff6ff 45%, #f9fbfd 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 40px 20px;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Contenedor tipo tarjeta limpia */
+        .content-container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(31, 61, 89, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #1e3d59;
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 25px;
+            border-bottom: 2px dashed #b4dbf7;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background-color: #fff;
+            color: #2c3e50;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .btn-submit {
+            padding: 11px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn-submit:hover {
+            background-color: #2980b9;
+        }
+
+        .link-cancel {
+            margin-left: 15px;
+            text-decoration: none;
+            color: #718096;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .link-cancel:hover {
+            color: #1e3d59;
+            text-decoration: underline;
+        }
+
+        /* Mensaje de denegado */
+        .error-card {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Editar Sala: <%= sala.nombre %></h1>
-    
-    <form action="/salas/editar/<%= sala.id %>" method="POST">
-        <div style="margin-bottom: 15px;">
-            <label>Nombre de la Sala:</label><br>
-            <input type="text" name="nombre" value="<%= sala.nombre %>" required style="padding: 8px; width: 300px;">
+
+    <!-- 🔐 CONTROL DE ACCESO EN SERVIDOR: Solo Personal Autorizado -->
+    <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado') && typeof sala !== 'undefined') { %>
+
+        <div class="content-container">
+            <h1>✏️ Editar Sala: <%= sala.nombre %></h1>
+            
+            <form action="/salas/editar/<%= sala.id %>" method="POST">
+                <div class="form-group">
+                    <label for="nombre">Nombre de la Sala:</label>
+                    <input type="text" id="nombre" name="nombre" value="<%= sala.nombre %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="capacidad">Capacidad (Asientos):</label>
+                    <input type="number" id="capacidad" name="capacidad" value="<%= sala.capacidad %>" required min="1">
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo_pantalla">Tipo de Pantalla:</label>
+                    <select id="tipo_pantalla" name="tipo_pantalla" required>
+                        <option value="2D" <%= sala.tipo_pantalla === '2D' ? 'selected' : '' %>>2D</option>
+                        <option value="3D" <%= sala.tipo_pantalla === '3D' ? 'selected' : '' %>>3D</option>
+                        <option value="IMAX" <%= sala.tipo_pantalla === 'IMAX' ? 'selected' : '' %>>IMAX</option>
+                    </select>
+                </div>
+
+                <div style="margin-top: 25px; display: flex; align-items: center;">
+                    <button type="submit" class="btn-submit">🔄 Actualizar Sala</button>
+                    <a href="/salas" class="link-cancel">Cancelar</a>
+                </div>
+            </form>
         </div>
-        <div style="margin-bottom: 15px;">
-            <label>Capacidad (Asientos):</label><br>
-            <input type="number" name="capacidad" value="<%= sala.capacidad %>" required style="padding: 8px; width: 300px;">
+
+    <% } else { %>
+        
+        <!-- 🚫 VISTA ALTERNATIVA PARA CLIENTES -->
+        <div class="content-container error-card">
+            <h1 style="color: #e74c3c; border-bottom: none;">⚠️ Acción No Autorizada</h1>
+            <p style="color: #e67e22; font-weight: 500;">No tienes los privilegios necesarios para modificar los parámetros de infraestructura del cine.</p>
+            <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 20px 0;">
+            <a href="/" class="link-cancel" style="margin-left: 0;">🏠 Volver al inicio</a>
         </div>
-        <div style="margin-bottom: 15px;">
-            <label>Tipo de Pantalla:</label><br>
-            <select name="tipo_pantalla" required style="padding: 8px; width: 318px;">
-                <option value="2D" <%= sala.tipo_pantalla === '2D' ? 'selected' : '' %>>2D</option>
-                <option value="3D" <%= sala.tipo_pantalla === '3D' ? 'selected' : '' %>>3D</option>
-                <option value="IMAX" <%= sala.tipo_pantalla === 'IMAX' ? 'selected' : '' %>>IMAX</option>
-            </select>
-        </div>
-        <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">Actualizar Sala</button>
-        <a href="/salas" style="margin-left: 10px; text-decoration: none; color: gray;">Cancelar</a>
-    </form>
+
+    <% } %>
+
 </body>
 </html>

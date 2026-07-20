@@ -17,6 +17,37 @@
             align-items: center;
         }
 
+        /* 👑 Estilos para la barra de usuario superior */
+        .user-bar {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e3d59;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(30, 61, 89, 0.15);
+            box-sizing: border-box;
+        }
+
+        .btn-logout {
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #c0392b;
+        }
+
         /* Contenedor tipo tarjeta limpia para la tabla */
         .content-container {
             max-width: 1000px;
@@ -169,76 +200,119 @@
         
         .api-item:last-child { border-bottom: none; }
         .badge-api { background: #9b59b6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        
+        /* Mensaje de denegado */
+        .error-card {
+            text-align: center;
+            padding: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="content-container">
-        <h1>🎬 Salas de Cine (Renderizado por Vista/EJS)</h1>
-        
-        <a href="/salas/nueva" class="btn-create">+ Crear Nueva Sala</a>
+    <!-- 👤 BARRA DE USUARIO LOGUEADO -->
+    <% if (user) { %>
+        <div class="user-bar">
+            <span>👤 Conectado como: <strong><%= user.username %></strong> (<span style="color:#f1c40f;"><%= user.rol %></span>)</span>
+            <a href="/users/logout" class="btn-logout">🔑 Cerrar Sesión</a>
+        </div>
+    <% } %>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Capacidad</th>
-                    <th>Tipo de Pantalla</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% salas.forEach(function(sala) { %>
+    <!-- 🔐 CONTROL DE ACCESO TOTAL: Evaluamos el rol antes de pintar la información de infraestructura -->
+    <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
+
+        <div class="content-container">
+            <h1>🎬 Salas de Cine (Renderizado por Vista/EJS)</h1>
+            
+            <a href="/salas/nueva" class="btn-create">+ Crear Nueva Sala</a>
+
+            <table>
+                <thead>
                     <tr>
-                        <td><%= sala.id %></td>
-                        <td><%= sala.nombre %></td>
-                        <td><%= sala.capacidad %> asientos</td>
-                        <td><strong><%= sala.tipo_pantalla %></strong></td>
-                        <td>
-                            <div class="actions-cell">
-                                <a href="/salas/editar/<%= sala.id %>" class="link-edit">✏️ Editar</a>
-                                <button onclick="eliminarSala(<%= sala.id %>)" class="btn-delete">🗑️ Eliminar</button>
-                            </div>
-                        </td>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Capacidad</th>
+                        <th>Tipo de Pantalla</th>
+                        <th>Acciones</th>
                     </tr>
-                <% }); %>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <% salas.forEach(function(sala) { %>
+                        <tr>
+                            <td><%= sala.id %></td>
+                            <td><%= sala.nombre %></td>
+                            <td><%= sala.capacidad %> asientos</td>
+                            <td><strong><%= sala.tipo_pantalla %></strong></td>
+                            <td>
+                                <div class="actions-cell">
+                                    <a href="/salas/editar/<%= sala.id %>" class="link-edit">✏️ Editar</a>
+                                    <!-- 🛠️ Corrección: Agregadas comillas simples alrededor del ID de EJS -->
+                                    <button onclick="eliminarSala('<%= sala.id %>')" class="btn-delete">🗑️ Eliminar</button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
 
-        <a href="/" class="link-back">🏠 Volver al inicio</a>
-    </div>
+            <a href="/" class="link-back">🏠 Volver al inicio</a>
+        </div>
 
-    <div class="content-container">
-        <h2>⚡ Monitor de Salas Activas <span class="badge-api">CLIENT-SIDE FETCH</span></h2>
-        <p style="color:#718096; font-size:0.9rem; margin-top:0;">Esta sección consulta la infraestructura física consultando asíncronamente el endpoint JSON de la API:</p>
-        
-        <div class="api-render-container">
-            <div id="lista-salas-api">
-                <p style="color:#a0aec0; font-style:italic;">Analizando disponibilidad de salas...</p>
+        <div class="content-container">
+            <h2>⚡ Monitor de Salas Activas <span class="badge-api">CLIENT-SIDE FETCH</span></h2>
+            <p style="color:#718096; font-size:0.9rem; margin-top:0;">Esta sección consulta la infraestructura física consultando asíncronamente el endpoint JSON de la API:</p>
+            
+            <div class="api-render-container">
+                <div id="lista-salas-api">
+                    <p style="color:#a0aec0; font-style:italic;">Analizando disponibilidad de salas...</p>
+                </div>
             </div>
         </div>
-    </div>
+
+    <% } else { %>
+        
+        <!-- 🚫 VISTA ALTERNATIVA PARA CLIENTES (BLOQUEO DE INTERFAZ) -->
+        <div class="content-container error-card">
+            <h1>⚠️ Acceso Denegado</h1>
+            <p style="color: #e67e22; font-weight: 500;">Lo sentimos, no posees los privilegios de personal (Empleado o Administrador) para auditar el inventario físico de las salas.</p>
+            <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 20px 0;">
+            <a href="/" class="link-back">🏠 Volver al menú de inicio</a>
+        </div>
+
+    <% } %>
 
     <script>
-    // Función clásica de borrado
+    // Función clásica de borrado protegida asíncronamente
     function eliminarSala(id) {
         if (confirm('¿Seguro que quieres borrar esta sala definitivamente?')) {
             fetch('/salas/eliminar/' + id, { method: 'DELETE' })
-            .then(() => {
+            .then(respuesta => {
+                if (!respuesta.ok) {
+                    throw new Error('No autorizado');
+                }
                 window.location.reload(); 
             })
-            .catch(error => console.log('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                alert('No tienes los permisos necesarios en el servidor para eliminar este recurso.');
+            });
         }
     }
 
     // Bloque Fetch para renderizar datos del lado del cliente (CSR)
     document.addEventListener("DOMContentLoaded", function() {
+        const contenedor = document.getElementById('lista-salas-api');
+        if (!contenedor) return; // Si el contenedor no existe (porque es cliente), detenemos la ejecución
+
         // Consultamos el endpoint correspondiente de tu API REST
         fetch('/api/salas') 
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No autorizado');
+                }
+                return response.json();
+            })
             .then(data => {
-                const contenedor = document.getElementById('lista-salas-api');
                 contenedor.innerHTML = ''; // Limpiamos el texto provisional
                 
                 if(data.length === 0) {
@@ -246,7 +320,7 @@
                     return;
                 }
 
-                // Listamos las salas obtenidas pures en el cliente
+                // Listamos las salas obtenidas puras en el cliente
                 data.forEach(s => {
                     const div = document.createElement('div');
                     div.className = 'api-item';
@@ -259,8 +333,8 @@
             })
             .catch(error => {
                 console.error('Error en fetch de la API de salas:', error);
-                document.getElementById('lista-salas-api').innerHTML = 
-                    '<p style="color:#e74c3c;">⚠️ No se pudo renderizar la API. Asegura que la ruta /api/salas retorne el arreglo JSON legítimo.</p>';
+                contenedor.innerHTML = 
+                    '<p style="color:#e67e22;">⚠️ <strong>Acceso limitado:</strong> Error al sincronizar con el feed en vivo.</p>';
             });
     });
     </script>
