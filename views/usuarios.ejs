@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gestión de Usuarios y Roles</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <style>
+        /* Fondo con degradado temático corporativo */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #d4ecfc 0%, #eff6ff 45%, #f9fbfd 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 40px 20px;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 👑 Barra de usuario superior */
+        .user-bar {
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e3d59;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(30, 61, 89, 0.15);
+            box-sizing: border-box;
+        }
+
+        .btn-logout {
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover { background-color: #c0392b; }
+
+        /* Contenedor tipo tarjeta limpia */
+        .content-container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(31, 61, 89, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #1e3d59;
+            font-size: 2.2rem;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        th {
+            background-color: #1e3d59;
+            color: #ffffff;
+            font-weight: 600;
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 0.95rem;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #eef2f5;
+            color: #4a5568;
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafd; }
+
+        /* Estilos de los roles */
+        .badge-rol {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .rol-admin { background-color: #f1c40f; color: #7f6000; }
+        .rol-empleado { background-color: #3498db; color: #ffffff; }
+        .rol-cliente { background-color: #95a5a6; color: #ffffff; }
+
+        /* Controles de cambio de rol */
+        .select-rol {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        .btn-update-rol {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin-left: 5px;
+            transition: background 0.2s;
+        }
+
+        .btn-update-rol:hover { background-color: #27ae60; }
+
+        .link-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #718096;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .link-back:hover { color: #1e3d59; }
+
+        .error-card { text-align: center; padding: 40px 20px; }
+    </style>
+</head>
+<body>
+
+    <!-- 👤 BARRA DE USUARIO LOGUEADO -->
+    <% if (user) { %>
+        <div class="user-bar">
+            <span>👤 Conectado como: <strong><%= user.username %></strong> (<span style="color:#f1c40f;"><%= user.rol %></span>)</span>
+            <a href="/users/logout" class="btn-logout">🔑 Cerrar Sesión</a>
+        </div>
+    <% } %>
+
+    <!-- 🔐 CONTROL DE ACCESO CRÍTICO: Solo el Administrador puede gestionar credenciales -->
+    <% if (user && user.rol === 'Administrador' && typeof usuarios !== 'undefined') { %>
+
+        <div class="content-container">
+            <h1>👥 Panel de Control de Usuarios</h1>
+            <p style="color: #718096; margin-top: -15px; margin-bottom: 25px;">Modifica los rangos y accesos de los empleados y clientes del cine en tiempo real.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre de Usuario</th>
+                        <th>Rol Actual</th>
+                        <th>Asignar Nuevo Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% usuarios.forEach(function(u) { %>
+                        <tr>
+                            <td><strong>#<%= u.id %></strong></td>
+                            <td><%= u.username %></td>
+                            <td>
+                                <span class="badge-rol <%= u.rol === 'Administrador' ? 'rol-admin' : (u.rol === 'Empleado' ? 'rol-empleado' : 'rol-cliente') %>">
+                                    <%= u.rol %>
+                                </span>
+                            </td>
+                            <td>
+                                <!-- Evitar que el administrador se pueda degradar el rol a sí mismo por accidente -->
+                                <% if (u.id === user.id) { %>
+                                    <small style="color: #a0aec0; font-style: italic;">Tu cuenta (Protegida)</small>
+                                <% } else { %>
+                                    <select id="select-<%= u.id %>" class="select-rol">
+                                        <option value="Cliente" <%= u.rol === 'Cliente' ? 'selected' : '' %>>Cliente</option>
+                                        <option value="Empleado" <%= u.rol === 'Empleado' ? 'selected' : '' %>>Empleado</option>
+                                        <option value="Administrador" <%= u.rol === 'Administrador' ? 'selected' : '' %>>Administrador</option>
+                                    </select>
+                                    <!-- 🛠️ Corrección: Agregadas comillas simples alrededor del ID en la llamada de la función -->
+                                    <button onclick="actualizarRol('<%= u.id %>')" class="btn-update-rol">🔄 Aplicar</button>
+                                <% } %>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+
+            <a href="/" class="link-back">🏠 Volver al menú principal</a>
+        </div>
+
+    <% } else { %>
+        
+        <!-- 🚫 REBOTE DE SEGURIDAD PARA EMPLEADOS O CLIENTES MALINTENCIONADOS -->
+        <div class="content-container error-card">
+            <h1 style="color: #e74c3c; font-size: 2rem;">⚠️ Sección Restringida</h1>
+            <p style="color: #e67e22; font-weight: 500; font-size: 1.1rem;">Acceso Denegado: Solo el Administrador principal tiene privilegios para auditar cuentas y escalar roles en la plataforma.</p>
+            <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 30px 0;">
+            <a href="/" class="link-back" style="color: #3498db;">🏠 Volver a un área segura</a>
+        </div>
+
+    <% } %>
+
+    <script>
+    // JS interactivo en el cliente para procesar el cambio de rol vía Fetch
+    function actualizarRol(idUsuario) {
+        const nuevoRol = document.getElementById('select-' + idUsuario).value;
+        
+        if (confirm(`¿Estás seguro de que deseas cambiar el rango de este usuario a "${nuevoRol}"?`)) {
+            
+            fetch('/users/actualizar-rol', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: idUsuario, rol: nuevoRol })
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Error al actualizar en el servidor');
+                }
+                return res.json();
+            })
+            .then(data => {
+                alert('¡Rol actualizado con éxito!');
+                window.location.reload(); // Recargamos para ver los cambios aplicados
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Error de privilegios: El servidor rechazó la operación.');
+            });
+        }
+    }
+    </script>
+</body>
+</html>
