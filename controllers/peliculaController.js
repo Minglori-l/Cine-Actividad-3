@@ -3,7 +3,7 @@ const Pelicula = require('../models/Pelicula');
 class PeliculaController {
     
     // ==========================================
-    // RUTAS API (Devuelven JSON)
+    // RUTAS API (Devuelven JSON o Redirigen según origen)
     // ==========================================
 
     async listarTodo(req, res) {
@@ -28,7 +28,24 @@ class PeliculaController {
     async agregar(req, res) {
         try {
             const { titulo, director, anio } = req.body;
+
+            // 🚨 VALIDACIÓN: Verificar campos obligatorios y formato básico
+            if (!titulo || !director || !anio || titulo.trim() === '' || director.trim() === '') {
+                return res.status(400).json({ error: "Todos los campos (titulo, director, anio) son obligatorios y no pueden estar vacíos." });
+            }
+
+            if (isNaN(anio)) {
+                return res.status(400).json({ error: "El año debe ser un número válido." });
+            }
+
             const result = await Pelicula.crear(titulo, director, anio);
+
+            // 🌟 DETECTAR ORIGEN: Si la petición viene del formulario HTML del navegador
+            if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+                return res.redirect('/cartelera');
+            }
+
+            // Si viene de Postman, un cliente externo o fetch de JS, responde JSON
             res.status(201).json({ mensaje: "Película agregada", id: result.insertId });
         } catch (error) {
             res.status(500).json({ error: error.message });
@@ -38,6 +55,16 @@ class PeliculaController {
     async editar(req, res) {
         try {
             const { titulo, director, anio } = req.body;
+
+            // 🚨 VALIDACIÓN: Verificar campos obligatorios en la edición
+            if (!titulo || !director || !anio || titulo.trim() === '' || director.trim() === '') {
+                return res.status(400).json({ error: "No se puede actualizar: Todos los campos son obligatorios." });
+            }
+
+            if (isNaN(anio)) {
+                return res.status(400).json({ error: "El año de edición debe ser un número válido." });
+            }
+
             const result = await Pelicula.actualizar(req.params.id, titulo, director, anio);
             if (result.affectedRows === 0) return res.status(404).json({ mensaje: "No encontrada" });
             res.json({ mensaje: "Actualizada con éxito" });
@@ -72,6 +99,16 @@ class PeliculaController {
     async agregarDesdeWeb(req, res) {
         try {
             const { titulo, director, anio } = req.body;
+
+            // 🚨 VALIDACIÓN: Para el formulario Web
+            if (!titulo || !director || !anio || titulo.trim() === '' || director.trim() === '') {
+                return res.send("Error: Todos los campos son obligatorios para registrar la película. Por favor regresa e intenta de nuevo.");
+            }
+
+            if (isNaN(anio)) {
+                return res.send("Error: El año debe ser un value numérico.");
+            }
+
             await Pelicula.crear(titulo, director, anio);
             res.redirect('/cartelera');
         } catch (error) {
