@@ -17,6 +17,37 @@
             align-items: center;
         }
 
+        /* 👑 Barra de usuario superior */
+        .user-bar {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e3d59;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(30, 61, 89, 0.15);
+            box-sizing: border-box;
+        }
+
+        .btn-logout {
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #c0392b;
+        }
+
         /* Contenedor tipo tarjeta limpia para la tabla */
         .content-container {
             max-width: 1000px;
@@ -188,11 +219,22 @@
 </head>
 <body>
 
+    <!-- 👤 BARRA DE USUARIO LOGUEADO -->
+    <% if (user) { %>
+        <div class="user-bar">
+            <span>👤 Conectado como: <strong><%= user.username %></strong> (<span style="color:#f1c40f;"><%= user.rol %></span>)</span>
+            <a href="/users/logout" class="btn-logout">🔑 Cerrar Sesión</a>
+        </div>
+    <% } %>
+
     <div class="content-container">
         <h1>🎬 Cartelera de Películas (Renderizado por Vista/EJS)</h1>
         <p>Gestión de los títulos disponibles en el complejo de cine.</p>
         
-        <a href="/nueva-pelicula" class="btn-create">+ Añadir Nueva Película</a>
+        <!-- 🔐 BOTÓN CREAR: Solo visible para Administrador y Empleado -->
+        <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
+            <a href="/nueva-pelicula" class="btn-create">+ Añadir Nueva Película</a>
+        <% } %>
 
         <table>
             <thead>
@@ -201,7 +243,8 @@
                     <th>Título</th>
                     <th>Director</th>
                     <th>Año</th>
-                    <th>Acción</th>
+                    <!-- Cabecera adaptada: cambia de "Acción" a "Acciones" según el nivel de privilegios -->
+                    <th><%= (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) ? 'Acciones' : 'Información' %></th>
                 </tr>
             </thead>
             <tbody>
@@ -212,9 +255,14 @@
                         <td><%= pelicula.director %></td>
                         <td><%= pelicula.anio %></td>
                         <td>
+                            <!-- 🟢 DETALLES: Accesible para TODOS los usuarios -->
                             <a href="/pelicula/<%= pelicula.id %>" class="link-action">🔍 Ver Detalles</a>
-                            <a href="/pelicula/editar/<%= pelicula.id %>" class="link-edit">✏️ Editar</a>
-                            <button onclick="eliminarPelicula(<%= pelicula.id %>)" class="btn-delete">🗑️ Eliminar</button>
+                            
+                            <!-- 🔐 EDITAR / ELIMINAR: Solo para Administradores y Empleados -->
+                            <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
+                                <a href="/pelicula/editar/<%= pelicula.id %>" class="link-edit">✏️ Editar</a>
+                                <button onclick="eliminarPelicula(<%= pelicula.id %>)" class="btn-delete">🗑️ Eliminar</button>
+                            <% } %>
                         </td>
                     </tr>
                 <% }); %>
@@ -252,9 +300,14 @@
 
     // Código JavaScript Asíncrono para demostrar Renderizado en Cliente (CSR)
     document.addEventListener("DOMContentLoaded", function() {
-        // Ejecutamos la consulta asíncrona hacia tu API de películas (Asegúrate de tener esta ruta configurada en tu backend)
+        // Ejecutamos la consulta asíncrona hacia tu API de películas
         fetch('/api/peliculas') 
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('No autorizado');
+                }
+                return response.json();
+            })
             .then(data => {
                 const contenedor = document.getElementById('lista-peliculas-api');
                 contenedor.innerHTML = ''; // Limpiamos el loader provisional
@@ -277,8 +330,9 @@
             })
             .catch(error => {
                 console.error('Error en fetch de la API de películas:', error);
+                // 🔐 Control del mensaje para clientes sin acceso a este endpoint específico de auditoría
                 document.getElementById('lista-peliculas-api').innerHTML = 
-                    '<p style="color:#e74c3c;">⚠️ No se pudo renderizar la API. Asegura que la ruta /api/peliculas devuelva el arreglo JSON correspondiente.</p>';
+                    '<p style="color:#e67e22;">⚠️ <strong>Acceso limitado:</strong> Solo los administradores y empleados pueden sincronizar directamente con el feed del API JSON.</p>';
             });
     });
     </script>
