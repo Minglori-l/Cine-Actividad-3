@@ -17,6 +17,37 @@
             align-items: center;
         }
 
+        /* 👑 Barra de usuario superior */
+        .user-bar {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1e3d59;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(30, 61, 89, 0.15);
+            box-sizing: border-box;
+        }
+
+        .btn-logout {
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #c0392b;
+        }
+
         /* Contenedor tipo tarjeta limpia para la tabla */
         .content-container {
             max-width: 1000px;
@@ -135,29 +166,60 @@
         /* Contenedor del renderizado de API */
         .api-badge-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
+            flex-direction: column;
+            border-left: 4px solid #9b59b6; 
+            padding-left: 20px;
+            margin-top: 15px;
         }
 
-        .api-badge {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: #4a5568;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        .api-list-item {
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px dashed #cbd5e1; 
+            font-size: 0.95rem;
+        }
+
+        .api-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .api-item-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #1e3d59;
+        }
+
+        .api-item-detail {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #9b59b6; 
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
 
+    <!-- 👤 BARRA DE USUARIO LOGUEADO -->
+    <% if (user) { %>
+        <div class="user-bar">
+            <span>👤 Conectado como: <strong><%= user.username %></strong> (<span style="color:#f1c40f;"><%= user.rol %></span>)</span>
+            <a href="/users/logout" class="btn-logout">🔑 Cerrar Sesión</a>
+        </div>
+    <% } %>
+
     <div class="content-container">
         <h1>📅 Funciones Programadas (Renderizado desde el Servidor)</h1>
         <p><small style="color: #718096;">*Esta tabla fue generada en el servidor mediante el motor de plantillas EJS.</small></p>
         
-        <a href="/funciones/nueva" class="btn-create">+ Programar Nueva Función</a>
+        <!-- 🔐 BOTÓN CREAR: Solo visible para Administrador y Empleado -->
+        <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
+            <a href="/funciones/nueva" class="btn-create">+ Programar Nueva Función</a>
+        <% } %>
 
         <table>
             <thead>
@@ -166,7 +228,10 @@
                     <th>Película</th>
                     <th>Sala</th>
                     <th>Fecha</th>
-                    <th>Acciones</th>
+                    <!-- 🔐 COLUMNA ACCIONES: Solo visible para Administrador y Empleado -->
+                    <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
+                        <th>Acciones</th>
+                    <% } %>
                 </tr>
             </thead>
             <tbody>
@@ -176,10 +241,14 @@
                         <td><%= f.titulo ? f.titulo : 'Sin asignar' %></td>
                         <td><%= f.sala_nombre %></td>
                         <td><%= new Date(f.fecha).toLocaleString() %></td>
-                        <td>
-                            <a href="/funciones/editar/<%= f.id %>" class="link-action">✏️ Editar</a>
-                            <button onclick="eliminarFuncion(<%= f.id %>)" class="btn-delete">🗑️ Eliminar</button>
-                        </td>
+                        
+                        <!-- 🔐 BOTONES ACCIÓN: Solo visibles si es Administrador o Empleado -->
+                        <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
+                            <td>
+                                <a href="/funciones/editar/<%= f.id %>" class="link-action">✏️ Editar</a>
+                                <button onclick="eliminarFuncion('<%= f.id %>')" class="btn-delete">🗑️ Eliminar</button>
+                            </td>
+                        <% } %>
                     </tr>
                 <% }); %>
             </tbody>
@@ -201,27 +270,35 @@
     <script>
     // JS para la petición a la API y Renderizado dinámico en Cliente
     document.addEventListener("DOMContentLoaded", () => {
-        // Suponiendo que tu ruta de router apunte a funcionesController.ultimasCinco
-        // Cambia '/funciones/api/ultimas' por la ruta exacta que le diste en tus archivos de routes
         fetch('/funciones/ultimas') 
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('No autorizado');
+                }
+                return res.json();
+            })
             .then(funciones => {
                 const contenedor = document.getElementById('lista-api-funciones');
-                contenedor.innerHTML = ''; // Limpiamos el texto de carga
+                contenedor.innerHTML = ''; 
 
                 if(funciones.length === 0) {
                     contenedor.innerHTML = '<span>No hay funciones recientes.</span>';
                     return;
                 }
 
-                // Aquí ocurre el renderizado dinámico en el navegador
                 funciones.forEach(f => {
                     const fechaFormateada = new Date(f.fecha).toLocaleDateString();
                     contenedor.innerHTML += `
-                        <div class="api-badge">
-                            <strong>🎬 ID Función: ${f.id}</strong><br>
-                            📅 Fecha: ${fechaFormateada}<br>
-                            🍿 Sala ID: ${f.sala_id}
+                        <div class="api-list-item">
+                            <div class="api-item-main">
+                                🎬 ID FUNCIÓN: ${f.id} 
+                                <span style="color: #718096; font-weight: 400; font-size: 0.9rem;">
+                                    (🍿 Sala ID: ${f.sala_id})
+                                </span>
+                            </div>
+                            <div class="api-item-detail">
+                                📅 Fecha: <strong>${fechaFormateada}</strong>
+                            </div>
                         </div>
                     `;
                 });
@@ -229,18 +306,19 @@
             .catch(err => {
                 console.error("Error cargando API:", err);
                 document.getElementById('lista-api-funciones').innerHTML = 
-                    '<span style="color: #e74c3c;">Error al conectar con la API de funciones.</span>';
+                    '<span style="color: #e67e22;">⚠️ <strong>Acceso limitado:</strong> Solo el personal autorizado puede ver el log de auditoría de la API.</span>';
             });
     });
 
-    // Función para eliminar
     function eliminarFuncion(id) {
         if (confirm('¿Seguro que quieres eliminar esta función?')) {
             fetch('/funciones/eliminar/' + id, {
                 method: 'DELETE'
             })
             .then(respuesta => {
-                if (!respuesta.ok) throw new Error('Error en la respuesta del servidor');
+                if (!respuesta.ok) {
+                    throw new Error('No autorizado u operación denegada');
+                }
                 return respuesta.json();
             })
             .then(datos => {
@@ -248,7 +326,7 @@
             })
             .catch(error => {
                 console.error('Error al intentar eliminar:', error);
-                alert('No se pudo eliminar la función.');
+                alert('Operación fallida: No tienes los privilegios necesarios en tu sesión para eliminar registros.');
             });
         }
     }
