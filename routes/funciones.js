@@ -6,7 +6,8 @@ const funcionController = require('../controllers/funcionController');
 router.get('/', (req, res) => funcionController.vistaFunciones(req, res));
 
 // Rutas API
-router.get('/api/ultimas', (req, res) => funcionController.ultimasCinco(req, res));
+router.get('/ultimas', (req, res) => funcionController.ultimasCinco(req, res));
+
 router.get('/api/fechas', (req, res) => funcionController.filtrarPorFecha(req, res));
 router.put('/api/:id/desvincular', (req, res) => funcionController.desvincularPelicula(req, res));
 router.get('/nueva', (req, res) => funcionController.vistaNuevaFuncion(req, res));
