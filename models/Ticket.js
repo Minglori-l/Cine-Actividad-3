@@ -54,11 +54,19 @@ class Ticket {
         return result;
     }
 
-    // Auxiliar: Obtener el listado de funciones para los desplegables (<select>) de los formularios
+    // Auxiliar para el desplegable de funciones con títulos y salas integrados
     static async obtenerFuncionesParaFormulario() {
-        const [funciones] = await pool.query(
-            'SELECT f.id, f.fecha, s.nombre AS sala_nombre FROM funciones f JOIN salas s ON f.sala_id = s.id'
-        );
+        const query = `
+            SELECT 
+                f.id, 
+                f.fecha AS horario,          
+                s.nombre AS sala,            
+                p.titulo AS titulo_pelicula  
+            FROM funciones f 
+            JOIN salas s ON f.sala_id = s.id
+            JOIN peliculas p ON f.pelicula_id = p.id
+        `;
+        const [funciones] = await pool.query(query);
         return funciones;
     }
 }
