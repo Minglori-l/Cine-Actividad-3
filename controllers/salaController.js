@@ -27,6 +27,16 @@ class SalaController {
     async crear(req, res) {
         try {
             const { nombre, capacidad, tipo_pantalla } = req.body;
+
+            // 🚨 VALIDACIÓN: Campos obligatorios y tipo de dato
+            if (!nombre || !capacidad || !tipo_pantalla || nombre.trim() === '' || tipo_pantalla.trim() === '') {
+                return res.status(400).json({ error: "Todos los campos (nombre, capacidad, tipo_pantalla) son obligatorios." });
+            }
+
+            if (isNaN(capacidad)) {
+                return res.status(400).json({ error: "La capacidad de la sala debe ser un valor numérico válido." });
+            }
+
             const result = await Sala.crear(nombre, capacidad, tipo_pantalla);
             res.status(201).json({ id: result.insertId, nombre, capacidad, tipo_pantalla });
         } catch (error) {
@@ -37,6 +47,16 @@ class SalaController {
     async editar(req, res) {
         try {
             const { nombre, capacidad, tipo_pantalla } = req.body;
+
+            // 🚨 VALIDACIÓN: Campos obligatorios en edición
+            if (!nombre || !capacidad || !tipo_pantalla || nombre.trim() === '' || tipo_pantalla.trim() === '') {
+                return res.status(400).json({ error: "No se puede editar: Todos los campos son obligatorios y no pueden estar vacíos." });
+            }
+
+            if (isNaN(capacidad)) {
+                return res.status(400).json({ error: "La capacidad editada debe ser un número válido." });
+            }
+
             const result = await Sala.actualizar(req.params.id, nombre, capacidad, tipo_pantalla);
             if (result.affectedRows === 0) return res.status(404).json({ mensaje: 'Sala no encontrada' });
             res.json({ mensaje: 'Sala actualizada exitosamente' });
@@ -78,6 +98,16 @@ class SalaController {
     async procesarNuevaSala(req, res) {
         try {
             const { nombre, capacidad, tipo_pantalla } = req.body;
+
+            // 🚨 VALIDACIÓN: Formulario Web
+            if (!nombre || !capacidad || !tipo_pantalla || nombre.trim() === '' || tipo_pantalla.trim() === '') {
+                return res.send("Error: Todos los campos son obligatorios para crear la sala. Por favor regresa.");
+            }
+
+            if (isNaN(capacidad)) {
+                return res.send("Error: La capacidad debe ser obligatoriamente un número.");
+            }
+
             await Sala.crear(nombre, capacidad, tipo_pantalla);
             res.redirect('/salas');
         } catch (error) {
@@ -98,10 +128,20 @@ class SalaController {
     async procesarEditarSala(req, res) {
         try {
             const { nombre, capacidad, tipo_pantalla } = req.body;
+
+            // 🚨 VALIDACIÓN: Formulario de edición Web
+            if (!nombre || !capacidad || !tipo_pantalla || nombre.trim() === '' || tipo_pantalla.trim() === '') {
+                return res.send("Error: No se pueden guardar cambios vacíos. Todos los campos son obligatorios.");
+            }
+
+            if (isNaN(capacidad)) {
+                return res.send("Error: La capacidad modificada debe ser numérica.");
+            }
+
             await Sala.actualizar(req.params.id, nombre, capacidad, tipo_pantalla);
             res.redirect('/salas');
         } catch (error) {
-            res.send("Error al actualizar la sala.");
+            res.redirect('/salas');
         }
     }
 
