@@ -1,10 +1,166 @@
-<form action="/funciones/nueva" method="POST">
-    <select name="pelicula_id" required>
-        <% peliculas.forEach(p => { %> <option value="<%= p.id %>"><%= p.titulo %></option> <% }) %>
-    </select>
-    <select name="sala_id" required>
-        <% salas.forEach(s => { %> <option value="<%= s.id %>"><%= s.nombre %></option> <% }) %>
-    </select>
-    <input type="datetime-local" name="fecha" required>
-    <button type="submit">Guardar</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Programar Nueva Función</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <style>
+        /* Fondo con degradado temático de cielo matutino */
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(180deg, #d4ecfc 0%, #eff6ff 45%, #f9fbfd 100%);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 40px 20px;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Contenedor tipo tarjeta limpia */
+        .content-container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(31, 61, 89, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #1e3d59;
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 25px;
+            border-bottom: 2px dashed #b4dbf7;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-size: 0.95rem;
+        }
+
+        input[type="datetime-local"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background-color: #fff;
+            color: #2c3e50;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2ecc71;
+        }
+
+        .btn-submit {
+            padding: 11px 20px;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.2);
+        }
+
+        .btn-submit:hover {
+            background-color: #27ae60;
+        }
+
+        .link-cancel {
+            margin-left: 15px;
+            text-decoration: none;
+            color: #718096;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        .link-cancel:hover {
+            color: #1e3d59;
+            text-decoration: underline;
+        }
+
+        /* Mensaje de denegado */
+        .error-card {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🔐 CONTROL DE ACCESO EN SERVIDOR: Solo Personal Autorizado -->
+    <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado') && typeof peliculas !== 'undefined' && typeof salas !== 'undefined') { %>
+
+        <div class="content-container">
+            <h1>📅 Programar Nueva Función</h1>
+            
+            <form action="/funciones/nueva" method="POST">
+                
+                <div class="form-group">
+                    <label for="pelicula_id">Seleccionar Película:</label>
+                    <select id="pelicula_id" name="pelicula_id" required>
+                        <option value="" disabled selected>-- Elige una película --</option>
+                        <% peliculas.forEach(p => { %> 
+                            <option value="<%= p.id %>"><%= p.titulo %></option> 
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="sala_id">Seleccionar Sala:</label>
+                    <select id="sala_id" name="sala_id" required>
+                        <option value="" disabled selected>-- Elige una sala --</option>
+                        <% salas.forEach(s => { %> 
+                            <option value="<%= s.id %>"><%= s.nombre %></option> 
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fecha">Fecha y Hora de la Función:</label>
+                    <input type="datetime-local" id="fecha" name="fecha" required>
+                </div>
+
+                <div style="margin-top: 25px; display: flex; align-items: center;">
+                    <button type="submit" class="btn-submit">💾 Guardar Función</button>
+                    <a href="/funciones" class="link-cancel">Cancelar</a>
+                </div>
+            </form>
+        </div>
+
+    <% } else { %>
+        
+        <!-- 🚫 VISTA ALTERNATIVA PARA CLIENTES -->
+        <div class="content-container error-card">
+            <h1 style="color: #e74c3c; border-bottom: none;">⚠️ Acción No Autorizada</h1>
+            <p style="color: #e67e22; font-weight: 500;">No dispones de los permisos de gestión requeridos para alterar o añadir elementos a la cartelera horaria.</p>
+            <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 20px 0;">
+            <a href="/" class="link-cancel" style="margin-left: 0;">🏠 Volver al inicio</a>
+        </div>
+
+    <% } %>
+
+</body>
+</html>
