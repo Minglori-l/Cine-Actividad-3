@@ -144,20 +144,24 @@
         <form action="/tickets/editar/<%= ticket.id %>" method="POST">
             
             <!-- 1. Selección de Función -->
-            <div class="form-group">
-                <label for="funcion_id">Seleccionar Función:</label>
-                <select name="funcion_id" id="funcion_id" class="form-control" required>
-                    <!-- Ejemplo estático basado en tu captura actual: -->
-                    <option value="1" selected>31/7/2026, 10:28:00 p. m. - SALA VIP</option>
-                    
-                    <!-- Descomenta esto para usar tus datos reales cuando vincules la base de datos: -->
-                    <!-- <% funciones.forEach(function(f) { %>
-                        <option value="<%= f.id %>" <%= f.id === ticket.funcion_id ? 'selected' : '' %> >
-                            <%= f.detalle %>
-                        </option>
-                    <% }); %> -->
-                </select>
-            </div>
+            
+<div class="form-group">
+    <label for="funcion_id">Seleccionar Función:</label>
+    <select name="funcion_id" id="funcion_id" class="form-control" required>
+        <% if (typeof funciones !== 'undefined' && funciones.length > 0) { %>
+            <% funciones.forEach(function(f) { %>
+                <option value="<%= f.id %>" <%= String(f.id) === String(ticket.funcion_id) ? 'selected' : '' %>>
+                    <%= f.fecha_hora || f.detalle || ('Función #' + f.id) %>
+                </option>
+            <% }); %>
+        <% } else { %>
+            <!-- Resguardo si solo tienes la función actual del ticket -->
+            <option value="<%= ticket.funcion_id %>" selected>
+                Función Actual (#<%= ticket.funcion_id %>)
+            </option>
+        <% } %>
+    </select>
+</div>
 
             <!-- 2. Asiento precargado -->
             <div class="form-group">
