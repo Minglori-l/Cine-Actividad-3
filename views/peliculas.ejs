@@ -243,8 +243,10 @@
                     <th>Título</th>
                     <th>Director</th>
                     <th>Año</th>
-                    <!-- Cabecera adaptada: cambia de "Acción" a "Acciones" según el nivel de privilegios -->
-                    <th><%= (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) ? 'Acciones' : 'Información' %></th>
+                    <!-- 🔐 Cabecera de acciones: Solo visible para usuarios con sesión activa -->
+                    <% if (user) { %>
+                        <th><%= (user.rol === 'Administrador' || user.rol === 'Empleado') ? 'Acciones' : 'Información' %></th>
+                    <% } %>
                 </tr>
             </thead>
             <tbody>
@@ -254,16 +256,20 @@
                         <td><strong><%= pelicula.titulo %></strong></td>
                         <td><%= pelicula.director %></td>
                         <td><%= pelicula.anio %></td>
-                        <td>
-                            <!-- 🟢 DETALLES: Accesible para TODOS los usuarios -->
-                            <a href="/pelicula/<%= pelicula.id %>" class="link-action">🔍 Ver Detalles</a>
-                            
-                            <!-- 🔐 EDITAR / ELIMINAR: Solo para Administradores y Empleados -->
-                            <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
-                                <a href="/pelicula/editar/<%= pelicula.id %>" class="link-edit">✏️ Editar</a>
-                                <button onclick="eliminarPelicula(<%= pelicula.id %>)" class="btn-delete">🗑️ Eliminar</button>
-                            <% } %>
-                        </td>
+
+                        <!-- 🔐 Columna de opciones: Solo visible para usuarios con sesión activa -->
+                        <% if (user) { %>
+                            <td>
+                                <!-- 🟢 DETALLES: Accesible para usuarios autenticados -->
+                                <a href="/pelicula/<%= pelicula.id %>" class="link-action">🔍 Ver Detalles</a>
+                                
+                                <!-- 🔐 EDITAR / ELIMINAR: Solo para Administradores y Empleados -->
+                                <% if (user.rol === 'Administrador' || user.rol === 'Empleado') { %>
+                                    <a href="/pelicula/editar/<%= pelicula.id %>" class="link-edit">✏️ Editar</a>
+                                    <button onclick="eliminarPelicula(<%= pelicula.id %>)" class="btn-delete">🗑️ Eliminar</button>
+                                <% } %>
+                            </td>
+                        <% } %>
                     </tr>
                 <% }); %>
             </tbody>
@@ -272,16 +278,19 @@
         <a href="/" class="link-back">🏠 Volver al inicio</a>
     </div>
 
-    <div class="content-container">
-        <h2>⚡ Feed de Cartelera Asíncrona <span class="badge-api">CLIENT-SIDE FETCH</span></h2>
-        <p style="color:#718096; font-size:0.9rem; margin-top:0;">Esta sección se genera de forma reactiva pidiendo los objetos directamente a tu endpoint del API JSON:</p>
-        
-        <div class="api-render-container">
-            <div id="lista-peliculas-api">
-                <p style="color:#a0aec0; font-style:italic;">Cargando catálogo dinámico...</p>
+    <!-- 🔐 FEED DE CARTELERA ASÍNCRONA: Oculto si el usuario NO ha iniciado sesión -->
+    <% if (user) { %>
+        <div class="content-container">
+            <h2>⚡ Feed de Cartelera Asíncrona <span class="badge-api">CLIENT-SIDE FETCH</span></h2>
+            <p style="color:#718096; font-size:0.9rem; margin-top:0;">Esta sección se genera de forma reactiva pidiendo los objetos directamente a tu endpoint del API JSON:</p>
+            
+            <div class="api-render-container">
+                <div id="lista-peliculas-api">
+                    <p style="color:#a0aec0; font-style:italic;">Cargando catálogo dinámico...</p>
+                </div>
             </div>
         </div>
-    </div>
+    <% } %>
 
     <script>
     // Función clásica para eliminar películas
@@ -300,40 +309,43 @@
 
     // Código JavaScript Asíncrono para demostrar Renderizado en Cliente (CSR)
     document.addEventListener("DOMContentLoaded", function() {
-        // Ejecutamos la consulta asíncrona hacia tu API de películas
-        fetch('/api/peliculas') 
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('No autorizado');
-                }
-                return response.json();
-            })
-            .then(data => {
-                const contenedor = document.getElementById('lista-peliculas-api');
-                contenedor.innerHTML = ''; // Limpiamos el loader provisional
-                
-                if(data.length === 0) {
-                    contenedor.innerHTML = '<p style="color:#a0aec0;">No hay títulos indexados en el log de la API.</p>';
-                    return;
-                }
+        const contenedorApi = document.getElementById('lista-peliculas-api');
+        
+        // Ejecutamos la consulta solo si el elemento existe en el DOM
+        if (contenedorApi) {
+            fetch('/api/peliculas') 
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('No autorizado');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    contenedorApi.innerHTML = ''; // Limpiamos el loader provisional
+                    
+                    if(data.length === 0) {
+                        contenedorApi.innerHTML = `<p style="color:#a0aec0;">No hay títulos indexados en el log de la API.</p>`;
+                        return;
+                    }
 
-                // Dibujamos dinámicamente las películas usando JavaScript nativo
-                data.forEach(p => {
-                    const div = document.createElement('div');
-                    div.className = 'api-item';
-                    div.innerHTML = `
-                        <span>🎥 <strong>${p.titulo}</strong> (Dir: ${p.director})</span>
-                        <span style="color:#2980b9;">📅 Estreno: <strong>${p.anio}</strong></span>
+                    // Dibujamos dinámicamente las películas usando JavaScript nativo
+                    data.forEach(p => {
+                        const div = document.createElement('div');
+                        div.className = 'api-item';
+                        div.innerHTML = `
+                            <span>🎥 <strong>${p.titulo}</strong> (Dir: ${p.director})</span>
+                            <span style="color:#2980b9;">📅 Estreno: <strong>${p.anio}</strong></span>
+                        `;
+                        contenedorApi.appendChild(div);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error en fetch de la API de películas:', error);
+                    contenedorApi.innerHTML = `
+                        <p style="color:#e67e22;">⚠️ <strong>Acceso limitado:</strong> Solo los administradores y empleados pueden sincronizar directamente con el feed del API JSON.</p>
                     `;
-                    contenedor.appendChild(div);
                 });
-            })
-            .catch(error => {
-                console.error('Error en fetch de la API de películas:', error);
-                // 🔐 Control del mensaje para clientes sin acceso a este endpoint específico de auditoría
-                document.getElementById('lista-peliculas-api').innerHTML = 
-                    '<p style="color:#e67e22;">⚠️ <strong>Acceso limitado:</strong> Solo los administradores y empleados pueden sincronizar directamente con el feed del API JSON.</p>';
-            });
+        }
     });
     </script>
 </body>

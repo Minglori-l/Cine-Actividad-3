@@ -282,22 +282,35 @@
     <% } %>
 
     <script>
-    // Función clásica de borrado protegida asíncronamente
-    function eliminarSala(id) {
-        if (confirm('¿Seguro que quieres borrar esta sala definitivamente?')) {
-            fetch('/salas/eliminar/' + id, { method: 'DELETE' })
-            .then(respuesta => {
-                if (!respuesta.ok) {
-                    throw new Error('No autorizado');
-                }
-                window.location.reload(); 
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('No tienes los permisos necesarios en el servidor para eliminar este recurso.');
-            });
+    
+// ✅ Función de borrado corregida y sincronizada con la API
+function eliminarSala(id) {
+    if (!confirm('¿Seguro que quieres borrar esta sala definitivamente?')) return;
+
+    fetch('/salas/eliminar/' + id, { 
+        method: 'DELETE',
+        headers: {
+            'Accept': 'application/json'
         }
-    }
+    })
+    .then(async respuesta => {
+        const data = await respuesta.json().catch(() => ({}));
+
+        // Si la respuesta fue exitosa (código 200) o si data.success es true
+        if (respuesta.ok && (data.success !== false)) {
+            // Recargamos la vista automáticamente sin alertas molestas
+            window.location.reload();
+        } else {
+            // Si realmente hubo un error en la base de datos o permisos
+            alert(data.message || data.error || 'No se pudo eliminar la sala.');
+        }
+    })
+    .catch(error => {
+        console.error('Error en la petición:', error);
+        alert('Error de conexión con el servidor.');
+    });
+}
+
 
     // Bloque Fetch para renderizar datos del lado del cliente (CSR)
     document.addEventListener("DOMContentLoaded", function() {
