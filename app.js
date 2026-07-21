@@ -1,8 +1,16 @@
+// Carga segura de dotenv (si no está instalado, no rompe la app)
+try {
+  require('dotenv').config();
+} catch (e) {
+  console.log('⚠️ dotenv no está instalado o no se encontró archivo .env');
+}
+
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var jwt = require('jsonwebtoken');
 
 // Importamos tus rutas
 var indexRouter = require('./routes/index');
@@ -18,7 +26,7 @@ const { verificarAcceso } = require('./middlewares/auth');
 
 var app = express();
 
-// view engine setup
+// Configuración del motor de plantillas
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -28,16 +36,17 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware global para pasar los datos del usuario logueado a todas las vistas EJS y rutas
+// 🔐 Middleware global para pasar el usuario a todas las vistas EJS
 app.use((req, res, next) => {
-  const token = req.cookies.token;
+  const token = req.cookies ? req.cookies.token : null;
+
   if (token) {
     try {
-      const jwt = require('jsonwebtoken');
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      res.locals.user = decoded; // Disponible en cualquier archivo .ejs
-      req.user = decoded;        // Disponible en controladores y middlewares
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secreto_por_defecto');
+      res.locals.user = decoded; // Disponible en EJS
+      req.user = decoded;        // Disponible en controladores
     } catch (error) {
+      console.error('❌ Error al verificar token JWT:', error.message);
       res.clearCookie('token');
       res.locals.user = null;
       req.user = null;
@@ -52,36 +61,27 @@ app.use((req, res, next) => {
 // 🔓 RUTAS PÚBLICAS
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-app.use('/api/dulces', dulcesRouter);
 
 // 🔐 RUTAS PROTEGIDAS POR ROLES
-
-// Solo Administradores y Empleados
 app.use('/api/peliculas', verificarAcceso(['Administrador', 'Empleado']), peliculasRouter);
 app.use('/funciones', verificarAcceso(['Administrador', 'Empleado']), funcionesRouter);
 app.use('/api/salas', verificarAcceso(['Administrador', 'Empleado']), salasRouter);
 
-// Administradores, Empleados y Clientes (Todos los autenticados)
 app.use('/api/tickets', verificarAcceso(['Administrador', 'Empleado', 'Cliente']), ticketsRouter);
 app.use('/api/dulces', verificarAcceso(['Administrador', 'Empleado', 'Cliente']), dulcesRouter);
 
-// catch 404 and forward to error handler
+// Manejo de error 404
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// error handler
+// Manejo de errores generales
 app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
   res.status(err.status || 500);
   res.render('error');
-});
-
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
 
 module.exports = app;
