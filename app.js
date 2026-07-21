@@ -11,6 +11,7 @@ var peliculasRouter = require('./routes/peliculas');
 const funcionesRouter = require('./routes/funciones');
 const salasRouter = require('./routes/salas');
 const ticketsRouter = require('./routes/tickets');
+const dulcesRouter = require('./routes/dulces');
 
 // 🔐 IMPORTAMOS EL MIDDLEWARE DE PROTECCIÓN
 const { verificarAcceso } = require('./middlewares/auth');
@@ -35,7 +36,7 @@ app.use((req, res, next) => {
       const jwt = require('jsonwebtoken');
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       res.locals.user = decoded; // Disponible en cualquier archivo .ejs
-      req.user = decoded;        // 🔥 NUEVO: Ahora estará disponible en tus controladores y middlewares (req.user)
+      req.user = decoded;        // Disponible en controladores y middlewares
     } catch (error) {
       res.clearCookie('token');
       res.locals.user = null;
@@ -48,18 +49,21 @@ app.use((req, res, next) => {
   next();
 });
 
-// 🔓 RUTAS PÚBLICAS (Cualquiera puede entrar a ver el inicio o loguearse)
+// 🔓 RUTAS PÚBLICAS
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/api/dulces', dulcesRouter);
 
 // 🔐 RUTAS PROTEGIDAS POR ROLES
-// Solo Administradores y Empleados pueden gestionar Películas, Funciones y Salas
+
+// Solo Administradores y Empleados
 app.use('/api/peliculas', verificarAcceso(['Administrador', 'Empleado']), peliculasRouter);
 app.use('/funciones', verificarAcceso(['Administrador', 'Empleado']), funcionesRouter);
 app.use('/api/salas', verificarAcceso(['Administrador', 'Empleado']), salasRouter);
 
-// Los Tickets los pueden gestionar todos los usuarios autenticados (Admin, Empleado y Clientes)
+// Administradores, Empleados y Clientes (Todos los autenticados)
 app.use('/api/tickets', verificarAcceso(['Administrador', 'Empleado', 'Cliente']), ticketsRouter);
+app.use('/api/dulces', verificarAcceso(['Administrador', 'Empleado', 'Cliente']), dulcesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
