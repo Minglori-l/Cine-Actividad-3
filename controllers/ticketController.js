@@ -160,7 +160,7 @@ class TicketController {
     async procesarEliminarTicket(req, res) {
         try {
             await Ticket.eliminar(req.params.id);
-            res.redirect('/tickets');
+            return res.json({ success: true, message: 'Ticket eliminado correctamente' });
         } catch (error) {
             console.error("❌ Error en procesarEliminarTicket:", error);
             res.send("Error al eliminar el ticket: " + error.message);
