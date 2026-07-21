@@ -8,7 +8,7 @@ Este es un sistema moderno e intuitivo para la administración completa de un ci
 ## 📺 Video Demostrativo y Defensa del Proyecto
 [![Defensa del Proyecto - Sistema de Cine](https://img.youtube.com/vi/TU_ID_DE_YOUTUBE/0.jpg)](https://www.youtube.com/watch?v=TU_ID_DE_YOUTUBE)
 
-> 💡 **Nota:** Haz clic en la imagen de arriba para redirigirte a YouTube y ver la explicación en video sobre el funcionamiento del sistema, la arquitectura aplicada y el cumplimiento de la rúbrica de seguridad. *(Recuerda cambiar "TU_ID_DE_YOUTUBE" por el código real de tu video)*.
+> 💡 **Nota:** Haz clic en la imagen de arriba para redirigirte a YouTube y ver la explicación en video sobre el funcionamiento del sistema, la arquitectura aplicada y el cumplimiento de la rúbrica de seguridad.
 
 ---
 
