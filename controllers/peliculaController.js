@@ -40,9 +40,9 @@ class PeliculaController {
 
             const result = await Pelicula.crear(titulo, director, anio);
 
-            // 🌟 DETECTAR ORIGEN: Si la petición viene del formulario HTML del navegador
+            // 🌟 DETECTAR ORIGEN: Si viene del formulario HTML del navegador
             if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
-                return res.redirect('/cartelera');
+                return res.redirect('/api/peliculas/cartelera');
             }
 
             // Si viene de Postman, un cliente externo o fetch de JS, responde JSON
@@ -67,6 +67,13 @@ class PeliculaController {
 
             const result = await Pelicula.actualizar(req.params.id, titulo, director, anio);
             if (result.affectedRows === 0) return res.status(404).json({ mensaje: "No encontrada" });
+
+            // 🌟 DETECTAR ORIGEN: Si viene del formulario HTML del navegador, redirige a la vista gráfica
+            if (req.headers['content-type'] === 'application/x-www-form-urlencoded') {
+                return res.redirect('/api/peliculas/cartelera');
+            }
+
+            // Si viene de Postman o un fetch de JS, responde JSON
             res.json({ mensaje: "Actualizada con éxito" });
         } catch (error) {
             res.status(500).json({ error: error.message });
@@ -90,7 +97,10 @@ class PeliculaController {
     async vistaPeliculas(req, res) {
         try {
             const peliculas = await Pelicula.obtenerTodas();
-            res.render('peliculas', { titulo: 'Cartelera de Cine', peliculas });
+            // 🔑 Pasamos la sesión del usuario a la vista
+            const user = req.session && req.session.user ? req.session.user : null;
+
+            res.render('peliculas', { titulo: 'Cartelera de Cine', peliculas, user });
         } catch (error) {
             res.send("Error al cargar la cartelera");
         }
@@ -110,7 +120,7 @@ class PeliculaController {
             }
 
             await Pelicula.crear(titulo, director, anio);
-            res.redirect('/cartelera');
+            res.redirect('/api/peliculas/cartelera');
         } catch (error) {
             res.send("Error al guardar");
         }
@@ -120,21 +130,29 @@ class PeliculaController {
         try {
             const rows = await Pelicula.obtenerPorId(req.params.id);
             if (rows.length === 0) return res.send("No encontrada");
-            res.render('detalle-pelicula', { pelicula: rows[0] });
+
+            // 🔑 Pasamos la sesión del usuario a la vista
+            const user = req.session && req.session.user ? req.session.user : null;
+
+            res.render('detalle-pelicula', { pelicula: rows[0], user });
         } catch (error) {
             res.send("Error");
         }
     }
 
     vistaNuevaPelicula(req, res) {
-        res.render('nueva-pelicula');
+        const user = req.session && req.session.user ? req.session.user : null;
+        res.render('nueva-pelicula', { user });
     }
 
     async vistaEditarPelicula(req, res) {
         try {
             const rows = await Pelicula.obtenerPorId(req.params.id);
             if (rows.length === 0) return res.send("Película no encontrada");
-            res.render('editar-pelicula', { pelicula: rows[0] });
+
+            const user = req.session && req.session.user ? req.session.user : null;
+
+            res.render('editar-pelicula', { pelicula: rows[0], user });
         } catch (error) {
             res.send("Error al cargar el formulario de edición");
         }
