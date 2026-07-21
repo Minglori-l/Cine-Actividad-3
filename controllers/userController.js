@@ -1,35 +1,45 @@
-// 📦 Importamos la conexión a la base de datos (Ajusta la ruta según tu carpeta, ej: '../config/db')
+// 📦 Importamos la conexión a la base de datos
 const db = require('../config/db'); 
 const Usuario = require('../models/Usuario');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const userController = {
-    // 🚪 Mostrar la pantalla de Login
+    // 🚪 Mostrar la pantalla de Login (Ahora captura el parámetro ?mensaje=...)
     getLogin(req, res) {
-        res.render('login', { error: null });
+        const mensaje = req.query.mensaje || null;
+        res.render('login', { error: null, mensaje });
     },
 
     // 🔑 Procesar el formulario de Login
     async login(req, res) {
         const { username, password } = req.body;
 
-        // 🔥 NUEVO: Validación de datos obligatorios requerida por la rúbrica
+        // Validación de datos obligatorios
         if (!username || !password || username.trim() === '' || password.trim() === '') {
-            return res.render('login', { error: 'Por favor, ingrese tanto el usuario como la contraseña.' });
+            return res.render('login', { 
+                error: 'Por favor, ingrese tanto el usuario como la contraseña.', 
+                mensaje: null 
+            });
         }
 
         try {
             // 1. Buscar si el usuario existe
             const user = await Usuario.findByUsername(username);
             if (!user) {
-                return res.render('login', { error: 'Usuario o contraseña incorrectos.' });
+                return res.render('login', { 
+                    error: 'Usuario o contraseña incorrectos.', 
+                    mensaje: null 
+                });
             }
 
             // 2. Verificar si la contraseña coincide usando bcrypt
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
-                return res.render('login', { error: 'Usuario o contraseña incorrectos.' });
+                return res.render('login', { 
+                    error: 'Usuario o contraseña incorrectos.', 
+                    mensaje: null 
+                });
             }
 
             // 3. Si todo está bien, creamos el Token de sesión (JWT)
@@ -51,7 +61,10 @@ const userController = {
 
         } catch (error) {
             console.error('Error en el login:', error);
-            res.render('login', { error: 'Ocurrió un error inesperado en el servidor.' });
+            res.render('login', { 
+                error: 'Ocurrió un error inesperado en el servidor.', 
+                mensaje: null 
+            });
         }
     },
 
@@ -64,16 +77,21 @@ const userController = {
     async registro(req, res) {
         const { username, password, rol } = req.body;
 
-        // 🔥 NUEVO: Validación de datos obligatorios requerida por la rúbrica
         if (!username || !password || !rol || username.trim() === '' || password.trim() === '') {
-            return res.render('registro', { error: 'Todos los campos son obligatorios (Usuario, Contraseña y Rol).', success: null });
+            return res.render('registro', { 
+                error: 'Todos los campos son obligatorios (Usuario, Contraseña y Rol).', 
+                success: null 
+            });
         }
 
         try {
             // 1. Verificar si el usuario ya está registrado
             const existingUser = await Usuario.findByUsername(username);
             if (existingUser) {
-                return res.render('registro', { error: 'El nombre de usuario ya está en uso.', success: null });
+                return res.render('registro', { 
+                    error: 'El nombre de usuario ya está en uso.', 
+                    success: null 
+                });
             }
 
             // 2. Encriptar la contraseña del nuevo usuario
@@ -82,11 +100,17 @@ const userController = {
             // 3. Guardar en la Base de Datos
             await Usuario.create(username, hashedPassword, rol);
 
-            res.render('registro', { error: null, success: '¡Usuario registrado con éxito! Ya puedes iniciar sesión.' });
+            res.render('registro', { 
+                error: null, 
+                success: '¡Usuario registrado con éxito! Ya puedes iniciar sesión.' 
+            });
 
         } catch (error) {
             console.error('Error en el registro:', error);
-            res.render('registro', { error: 'No se pudo registrar el usuario.', success: null });
+            res.render('registro', { 
+                error: 'No se pudo registrar el usuario.', 
+                success: null 
+            });
         }
     },
 
@@ -100,8 +124,6 @@ const userController = {
     async listarUsuarios(req, res) {
         try {
             const query = 'SELECT id, username, rol FROM usuarios ORDER BY id ASC';
-            
-            // 🛠️ Usamos await y destructuramos [resultados] para obtener las filas de la promesa
             const [resultados] = await db.query(query);
             
             res.render('usuarios', { 
@@ -132,8 +154,6 @@ const userController = {
 
         try {
             const query = 'UPDATE usuarios SET rol = ? WHERE id = ?';
-            
-            // 🛠️ Ejecución asíncrona basada en Promesas sin callbacks
             await db.query(query, [rol, id]);
 
             res.json({ success: true, message: 'Rol escalado correctamente.' });

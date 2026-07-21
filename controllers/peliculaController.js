@@ -91,14 +91,15 @@ class PeliculaController {
     }
 
     // ==========================================
-    // RUTAS DE VISTAS (Para el navegador)
+    // RUTAS DE VISTAS (Para el navegador con EJS)
     // ==========================================
 
     async vistaPeliculas(req, res) {
         try {
             const peliculas = await Pelicula.obtenerTodas();
-            // 🔑 Pasamos la sesión del usuario a la vista
-            const user = req.session && req.session.user ? req.session.user : null;
+            
+            // 🔑 Extraemos el usuario desde req.user (proporcionado por JWT) o res.locals.user
+            const user = req.user || res.locals.user || null;
 
             res.render('peliculas', { titulo: 'Cartelera de Cine', peliculas, user });
         } catch (error) {
@@ -116,7 +117,7 @@ class PeliculaController {
             }
 
             if (isNaN(anio)) {
-                return res.send("Error: El año debe ser un value numérico.");
+                return res.send("Error: El año debe ser un valor numérico.");
             }
 
             await Pelicula.crear(titulo, director, anio);
@@ -131,8 +132,8 @@ class PeliculaController {
             const rows = await Pelicula.obtenerPorId(req.params.id);
             if (rows.length === 0) return res.send("No encontrada");
 
-            // 🔑 Pasamos la sesión del usuario a la vista
-            const user = req.session && req.session.user ? req.session.user : null;
+            // 🔑 Extraemos el usuario desde req.user / res.locals.user
+            const user = req.user || res.locals.user || null;
 
             res.render('detalle-pelicula', { pelicula: rows[0], user });
         } catch (error) {
@@ -141,7 +142,7 @@ class PeliculaController {
     }
 
     vistaNuevaPelicula(req, res) {
-        const user = req.session && req.session.user ? req.session.user : null;
+        const user = req.user || res.locals.user || null;
         res.render('nueva-pelicula', { user });
     }
 
@@ -150,7 +151,7 @@ class PeliculaController {
             const rows = await Pelicula.obtenerPorId(req.params.id);
             if (rows.length === 0) return res.send("Película no encontrada");
 
-            const user = req.session && req.session.user ? req.session.user : null;
+            const user = req.user || res.locals.user || null;
 
             res.render('editar-pelicula', { pelicula: rows[0], user });
         } catch (error) {
