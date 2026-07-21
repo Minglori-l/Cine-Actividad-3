@@ -8,7 +8,7 @@
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(180deg, #d4ecfc 0%, #eff6ff 45%, #f9fbfd 100%);
-            background-attachment: fixed; /* Mantiene el degradado fijo al hacer scroll */
+            background-attachment: fixed;
             margin: 0;
             padding: 40px 20px;
             color: #2c3e50;
@@ -52,7 +52,7 @@
         .content-container {
             max-width: 1000px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.85); /* Blanco traslúcido */
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             padding: 30px;
@@ -75,7 +75,6 @@
         h1 { font-size: 2.2rem; margin-bottom: 10px; }
         h2 { font-size: 1.6rem; margin-bottom: 15px; border-bottom: 2px dashed #b4dbf7; padding-bottom: 8px; }
 
-        /* Subtítulo o descripción */
         p {
             color: #5a6b7c;
             font-size: 1.05rem;
@@ -103,14 +102,14 @@
             box-shadow: 0 6px 16px rgba(52, 152, 219, 0.3);
         }
 
-        /* Estilización moderna para la Tabla de Datos */
+        /* Estilización para la Tabla de Datos */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 25px;
             background: #ffffff;
             border-radius: 10px;
-            overflow: hidden; /* Para que los bordes redondeados afecten a las filas */
+            overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
 
@@ -130,15 +129,9 @@
             font-size: 0.95rem;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafd; }
 
-        tr:hover td {
-            background-color: #f8fafd; /* Resalta la fila al pasar el mouse */
-        }
-
-        /* Enlaces de acciones (Ver Detalles / Editar / Eliminar) */
         .link-action {
             color: #3498db;
             text-decoration: none;
@@ -192,11 +185,8 @@
             transition: color 0.2s;
         }
 
-        .link-back:hover {
-            color: #1e3d59;
-        }
+        .link-back:hover { color: #1e3d59; }
 
-        /* Contenedor dinámico de la API */
         .api-render-container {
             background: #fdfefe;
             border-left: 5px solid #3498db;
@@ -219,10 +209,16 @@
 </head>
 <body>
 
+    <!-- 🛠️ HELPER LOCAL PARA VERIFICAR ROLES (Insensible a mayúsculas/minúsculas) -->
+    <% 
+        const esAdminOEmpleado = user && user.rol && ['administrador', 'admin', 'empleado'].includes(String(user.rol).toLowerCase());
+        const nombreUsuario = user ? (user.username || user.nombre || 'Usuario') : '';
+    %>
+
     <!-- 👤 BARRA DE USUARIO LOGUEADO -->
     <% if (user) { %>
         <div class="user-bar">
-            <span>👤 Conectado como: <strong><%= user.username %></strong> (<span style="color:#f1c40f;"><%= user.rol %></span>)</span>
+            <span>👤 Conectado como: <strong><%= nombreUsuario %></strong> (<span style="color:#f1c40f;"><%= user.rol %></span>)</span>
             <a href="/users/logout" class="btn-logout">🔑 Cerrar Sesión</a>
         </div>
     <% } %>
@@ -231,8 +227,8 @@
         <h1>🎬 Cartelera de Películas (Renderizado por Vista/EJS)</h1>
         <p>Gestión de los títulos disponibles en el complejo de cine.</p>
         
-        <!-- 🔐 BOTÓN CREAR: Solo visible para Administrador y Empleado -->
-        <% if (user && (user.rol === 'Administrador' || user.rol === 'Empleado')) { %>
+        <!-- 🔐 BOTÓN CREAR: Visible para Administrador y Empleado -->
+        <% if (esAdminOEmpleado) { %>
             <a href="/nueva-pelicula" class="btn-create">+ Añadir Nueva Película</a>
         <% } %>
 
@@ -243,9 +239,9 @@
                     <th>Título</th>
                     <th>Director</th>
                     <th>Año</th>
-                    <!-- 🔐 Cabecera de acciones: Solo visible para usuarios con sesión activa -->
+                    <!-- 🔐 Cabecera de acciones: Visible si hay sesión activa -->
                     <% if (user) { %>
-                        <th><%= (user.rol === 'Administrador' || user.rol === 'Empleado') ? 'Acciones' : 'Información' %></th>
+                        <th><%= esAdminOEmpleado ? 'Acciones' : 'Información' %></th>
                     <% } %>
                 </tr>
             </thead>
@@ -257,14 +253,12 @@
                         <td><%= pelicula.director %></td>
                         <td><%= pelicula.anio %></td>
 
-                        <!-- 🔐 Columna de opciones: Solo visible para usuarios con sesión activa -->
+                        <!-- 🔐 Columna de opciones -->
                         <% if (user) { %>
                             <td>
-                                <!-- 🟢 DETALLES: Accesible para usuarios autenticados -->
                                 <a href="/pelicula/<%= pelicula.id %>" class="link-action">🔍 Ver Detalles</a>
                                 
-                                <!-- 🔐 EDITAR / ELIMINAR: Solo para Administradores y Empleados -->
-                                <% if (user.rol === 'Administrador' || user.rol === 'Empleado') { %>
+                                <% if (esAdminOEmpleado) { %>
                                     <a href="/pelicula/editar/<%= pelicula.id %>" class="link-edit">✏️ Editar</a>
                                     <button onclick="eliminarPelicula(<%= pelicula.id %>)" class="btn-delete">🗑️ Eliminar</button>
                                 <% } %>
@@ -278,7 +272,7 @@
         <a href="/" class="link-back">🏠 Volver al inicio</a>
     </div>
 
-    <!-- 🔐 FEED DE CARTELERA ASÍNCRONA: Oculto si el usuario NO ha iniciado sesión -->
+    <!-- 🔐 FEED DE CARTELERA ASÍNCRONA -->
     <% if (user) { %>
         <div class="content-container">
             <h2>⚡ Feed de Cartelera Asíncrona <span class="badge-api">CLIENT-SIDE FETCH</span></h2>
@@ -293,7 +287,6 @@
     <% } %>
 
     <script>
-    // Función clásica para eliminar películas
     function eliminarPelicula(id) {
         if (confirm('¿Seguro que quieres borrar esta película?')) {
             fetch('/pelicula/eliminar/' + id, {
@@ -307,11 +300,9 @@
         }
     }
 
-    // Código JavaScript Asíncrono para demostrar Renderizado en Cliente (CSR)
     document.addEventListener("DOMContentLoaded", function() {
         const contenedorApi = document.getElementById('lista-peliculas-api');
         
-        // Ejecutamos la consulta solo si el elemento existe en el DOM
         if (contenedorApi) {
             fetch('/api/peliculas') 
                 .then(response => {
@@ -321,14 +312,13 @@
                     return response.json();
                 })
                 .then(data => {
-                    contenedorApi.innerHTML = ''; // Limpiamos el loader provisional
+                    contenedorApi.innerHTML = '';
                     
                     if(data.length === 0) {
                         contenedorApi.innerHTML = `<p style="color:#a0aec0;">No hay títulos indexados en el log de la API.</p>`;
                         return;
                     }
 
-                    // Dibujamos dinámicamente las películas usando JavaScript nativo
                     data.forEach(p => {
                         const div = document.createElement('div');
                         div.className = 'api-item';
