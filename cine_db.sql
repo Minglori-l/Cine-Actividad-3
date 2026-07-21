@@ -104,6 +104,27 @@ INSERT INTO `tickets` (`id`, `funcion_id`, `asiento`, `precio`) VALUES
 (1, 1, 'B2', 4.00),
 (2, 2, 'A15', 4.00);
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `dulces`
+--
+
+CREATE TABLE `dulces` (
+  `id` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `categoria` varchar(50) NOT NULL,
+  `precio` decimal (10,2) NOT NULL,
+  `stock` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+--Volcado de datos para la tabla de `dulces`
+--
+INSERT INTO `dulces` (`id`, `nombre`, `categoria`, `precio`, `stock`) VALUES
+(1,'Cotufas Grandes', 'Cotufas', 5.50,40),
+(2, 'Refresco Mediano', 'Bebidas', 3.00,100);
+
 --
 -- Índices para tablas volcadas
 --
@@ -136,6 +157,12 @@ ALTER TABLE `tickets`
   ADD KEY `funcion_id` (`funcion_id`);
 
 --
+-- Indices de la tabla `dulces`
+--
+ALTER TABLE `dulces`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT de las tablas volcadas
 --
 
@@ -162,6 +189,12 @@ ALTER TABLE `salas`
 --
 ALTER TABLE `tickets`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `dulces`
+--
+ALTER TABLE `dulces`
+   MODIFY `id` int(11) NOT FULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Restricciones para tablas volcadas
