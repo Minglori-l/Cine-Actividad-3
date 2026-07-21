@@ -66,17 +66,31 @@ class SalaController {
     }
 
     async eliminar(req, res) {
-        try {
-            const result = await Sala.eliminarForzado(req.params.id);
-            if (result.affectedRows === 0) {
-                return res.status(404).json({ error: 'Sala no encontrada' });
-            }
-            res.json({ success: true, mensaje: 'Sala eliminada a la fuerza' });
-        } catch (error) {
-            console.error("Error al forzar eliminación:", error);
-            res.status(500).json({ error: 'Error interno del servidor al intentar forzar el borrado.' });
+    try {
+        const { id } = req.params;
+        const result = await Sala.eliminarForzado(id);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'No se encontró la sala especificada.' 
+            });
         }
+
+        // 🟢 CLAVE DEL ÉXITO: Responder JSON con código 200 (NUNCA res.redirect aquí)
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Sala eliminada correctamente' 
+        });
+
+    } catch (error) {
+        console.error("Error al eliminar sala:", error);
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Error interno en el servidor al intentar eliminar.' 
+        });
     }
+}
 
     // ==========================================
     // RUTAS DE VISTAS (Para el navegador y EJS)
@@ -148,7 +162,7 @@ class SalaController {
     async procesarEliminarSala(req, res) {
         try {
             await Sala.eliminarNormal(req.params.id);
-            res.redirect('/salas');
+            return res.json({ success: true, message: 'Sala eliminada' });
         } catch (error) {
             res.send("Error al eliminar la sala.");
         }
